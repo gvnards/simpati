@@ -89,7 +89,7 @@ export default {
 
 <style lang="less" scoped>
 #menu-wrapper {
-  max-width: 240px;
+  width: 240px;
   background-color: #222D32;
   min-height: 100vh;
   .logo {
@@ -130,6 +130,7 @@ export default {
     .profile-wrapper {
       display: flex;
       align-items: center;
+      justify-content: center;
       img {
         width: 60px;
       }

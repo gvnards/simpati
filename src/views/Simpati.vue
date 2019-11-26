@@ -1,16 +1,18 @@
 <template>
   <div id="simpati">
     <Menu :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
+    <Content :dataPegawai="dataPegawai" :currMenu="currMenu" />
   </div>
 </template>
 
 <script>
 import Menu from '@/components/Menu.vue'
+import Content from '@/components/Content.vue'
 
 export default {
   name: 'simpati',
   components: {
-    Menu
+    Menu, Content
   },
   data () {
     return {
@@ -60,9 +62,15 @@ export default {
       console.log(this.currMenu)
     }
   },
-  created () {
+  beforeMount () {
     this.dataPegawai = this.$route.params.data
-    console.log(this.$session.getAll())
   }
 }
 </script>
+
+<style lang="less" scoped>
+#simpati {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+}
+</style>

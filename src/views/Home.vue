@@ -20,22 +20,40 @@ export default {
   },
   methods: {
     login (login) {
-      console.log(login)
-
-      let cb = allPegawai.find(el => {
+      let pegawaiExist = allPegawai.find(el => {
         return el.nip === login.username
       })
 
-      if (cb !== undefined) {
-        this.$session.set('onLogin', cb.nip)
-        this.$router.push(`/${cb.nip}/layanan-simpati`)
+      if (pegawaiExist !== undefined) {
+        this.$session.set('onLogin', pegawaiExist.nip)
+        this.$router.push({
+          name: 'layanan-simpati',
+          params: {
+            userId: this.$session.get('onLogin'),
+            data: pegawaiExist
+          }
+        })
       } else {
         //
       }
     }
   },
   created () {
-    // console.log(this.$session.getAll())
+    console.log(this.$session.getAll())
+  },
+  beforeCreate () {
+    if (this.$session.get('session-id') !== undefined && this.$session.get('onLogin') !== undefined) {
+      let pegawaiExist = allPegawai.find(e => e.nip === this.$session.get('onLogin'))
+      if (pegawaiExist !== undefined) {
+        this.$router.push({
+          name: 'layanan-simpati',
+          params: {
+            userId: this.$session.get('onLogin'),
+            data: pegawaiExist
+          }
+        })
+      }
+    }
   }
 }
 </script>

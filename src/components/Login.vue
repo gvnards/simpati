@@ -59,19 +59,10 @@ export default {
 #home {
   position: relative;
   width: 100%;
-  &::before {
-    content: "";
-    z-index: -1;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    min-height: 100vh;
-    background-image: url("../assets/bg-login.jpg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
-  }
+  background-image: url("../assets/bg-login.jpg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
   .col-lg-6 {
     min-height: 100vh;
     .content {
@@ -109,14 +100,14 @@ export default {
     }
   }
   .login-wrapper {
-    width: 520px;
+    max-width: 520px;
     height: 542px;
     background-color: white;
     position: relative;
     top: 100%;
     left: 50%;
     transform: translate(-50%, -100%);
-    border-radius: 4px;
+    border-radius: 4px 4px 0px 0px;
     .container {
       padding: 40px;
       color: #1E6E8F;
@@ -166,6 +157,12 @@ export default {
         }
       }
     }
+  }
+}
+
+@media screen and (max-width: 991px) {
+  #home {
+    max-height: 100vh;
   }
 }
 </style>
