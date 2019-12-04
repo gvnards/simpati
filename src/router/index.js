@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import PageNotFound from '@/views/PageNotFound.vue'
 import Home from '@/views/Home.vue'
 import Simpati from '@/views/Simpati.vue'
 
@@ -25,6 +26,17 @@ const routes = [
       } else {
         next()
       }
+    }
+  },
+  {
+    path: '*/page-not-found',
+    name: 'page-not-found',
+    component: PageNotFound
+  },
+  {
+    path: '*',
+    beforeEnter: (to, from, next) => {
+      window.location.assign('/page-not-found')
     }
   }
 ]

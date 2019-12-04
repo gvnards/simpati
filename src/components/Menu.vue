@@ -130,7 +130,7 @@ export default {
     .profile-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: left;
       img {
         width: 60px;
       }
