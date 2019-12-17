@@ -20,5 +20,9 @@ module.exports = {
   },
   'button': {
     'masuk': 'Masuk'
+  },
+  'usulanCuti': {
+    'list': 'List',
+    'personal': 'Personal'
   }
 }

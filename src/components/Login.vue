@@ -22,7 +22,7 @@
                   <input v-model="login.username" type="text" class="form-control" :placeholder="`${$lang.input.placeholder.username} (${$lang.input.placeholder.nip})`">
                   <input v-model="login.password" type="password" class="form-control" :placeholder="`${$lang.input.placeholder.password} (tahun-bulan-tanggal lahir)`">
                 </div>
-                <button type="button" class="btn btn-primary btn-md btn-block text-uppercase" @click="$emit('login', login)">{{ $lang.button.masuk }}</button>
+                <button type="button" class="btn btn-primary btn-md btn-block text-uppercase" :disabled="button.masuk.disable" @click="$emit('login', login)">{{ $lang.button.masuk }}</button>
               </div>
               <div class="catatan-wrapper">
                 <p class="catatan">{{ $lang.login.catatan }} :</p>
@@ -38,6 +38,7 @@
 
 <script>
 export default {
+  props: ['button'],
   data () {
     return {
       login: {
@@ -143,10 +144,6 @@ export default {
           font-weight: 700;
           font-size: 18px;
           margin-top: 30px;
-          background-color: #1E6E8F;
-          &:hover {
-            background-color: rgb(23, 93, 122);
-          }
         }
       }
       .catatan-wrapper {

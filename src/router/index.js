@@ -18,7 +18,7 @@ const routes = [
   },
   {
     path: '/:userId/layanan-simpati',
-    name: 'layanan-simpati',
+    name: 'simpati',
     component: Simpati,
     beforeEnter: (to, from, next) => {
       if (from.name !== 'home') {

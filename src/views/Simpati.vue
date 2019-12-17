@@ -1,6 +1,6 @@
 <template>
   <div id="simpati">
-    <Menu :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
+    <Menu class="a" :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
     <Content :dataPegawai="dataPegawai" :currMenu="currMenu" />
   </div>
 </template>
@@ -48,6 +48,7 @@ export default {
         // 'eselon': '',
         // 'TMT_CPNS': '01-04-2006'
       },
+      dataAtasan: [],
       currMenu: ['Dasbor']
     }
   },
@@ -59,7 +60,6 @@ export default {
         this.$session.destroy()
         this.$router.push('/')
       }
-      console.log(this.currMenu)
     }
   },
   beforeMount () {
@@ -70,7 +70,9 @@ export default {
 
 <style lang="less" scoped>
 #simpati {
-  display: inline-grid;
-  grid-template-columns: auto auto;
+  display: flex;
+  .a {
+    min-width: 240px;
+  }
 }
 </style>

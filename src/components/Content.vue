@@ -1,33 +1,27 @@
 <template>
   <div id="content">
     <Header :dataPegawai="dataPegawai" :currMenu="currMenu"></Header>
-    <button class="btn btn-md btn-primary" @click="c()">Connect</button>
+    <div class="fill-content">
+      <Dashboard v-if="currMenu.includes('Dasbor')"></Dashboard>
+      <!-- Usulan -->
+      <Cuti :currMenu="currMenu" :dataPegawai="dataPegawai" v-else-if="currMenu.includes('Cuti')"></Cuti>
+    </div>
   </div>
 </template>
 
 <script>
 import Header from '@/components/Header.vue'
-import axios from 'axios'
+import Dashboard from '@/components/Dashboard.vue'
+import Cuti from '@/components/Cuti.vue'
 
 export default {
   props: ['currMenu', 'dataPegawai'],
   components: {
-    Header
+    Header,
+    Dashboard,
+    Cuti
   },
   methods: {
-    c () {
-      axios({
-        method: 'get',
-        url: 'https://server.cuti.bkpsdmsitubondo.id/',
-        params: {
-          onGet: 'UserLogin',
-          nip: 'admin',
-          password: 'admin'
-        }
-      }).then(res => {
-        console.log(res.data)
-      })
-    }
   }
 }
 </script>
@@ -38,5 +32,9 @@ export default {
   width: calc(100vw - 240px);
   min-width: 240px;
   padding: 10px 20px;
+  overflow: auto;
+  .fill-content {
+    margin-top: 20px;
+  }
 }
 </style>

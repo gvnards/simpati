@@ -3,15 +3,15 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'bootstrap/dist/js/bootstrap.js'
 
 import Lang from 'vue-lang'
 
 import VueSession from 'vue-session'
 
-Vue.use(BootstrapVue)
+import VueTelInput from 'vue-tel-input'
+
 Vue.use(Lang, {
   lang: 'id',
   locales: {
@@ -22,6 +22,7 @@ Vue.use(Lang, {
 Vue.use(VueSession, {
   persist: true
 })
+Vue.use(VueTelInput)
 
 Vue.config.productionTip = false
 
