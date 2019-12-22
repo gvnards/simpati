@@ -2,13 +2,22 @@
   <div>
     <!-- Modal -->
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-      <div class="modal-dialog" :class="window.width > 960 ? 'data-pribadi' : ''">
+      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== '1') ? 'data-pribadi' : 'data-usulan'">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalScrollableTitle">DATA PRIBADI</h5>
+            <h5 class="modal-title" id="exampleModalScrollableTitle">
+              <span v-if="edit">Usulan Cuti</span>
+              <span v-else>DATA PRIBADI</span>
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <div class="modal-body">
-            <div class="data-asn-wrapper">
+            <div v-if="edit || pengesahan">
+              <embed :src="url" type="application/pdf" style="width: 100%; height: 360px;">
+            </div>
+            <div v-else class="data-asn-wrapper">
               <div class="form-group">
                 <input type="text" class="form-control" :placeholder="dataPegawai.nip" readonly>
               </div>
@@ -30,18 +39,48 @@
             </div>
           </div>
           <div class="modal-footer text-footer">
-            <p class="text-secondary">* Jika ada kesalahan data, silakan hubungi Admin BKPSDM</p>
+            <p class="text-secondary" v-if="!edit && !pengesahan">* Jika ada kesalahan data, silakan hubungi Admin BKPSDM</p>
           </div>
         </div>
       </div>
 
-      <div class="modal-dialog modal-dialog-scrollable" :class="window.width > 960 ? 'data-cuti' : ''" role="document">
+      <div class="modal-dialog modal-dialog-scrollable" v-if="(!edit || (edit && data.kirimSurat !== '1'))" :class="window.width > 960 ? 'data-cuti' : ''" role="document" :style="pengesahan ? 'max-height: 486px;' : ''">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalScrollableTitle">DATA CUTI</h5>
+            <h5 class="modal-title" id="exampleModalScrollableTitle">
+              <span v-if="pengesahan">PERTIMBANGAN DAN KEPUTUSAN</span>
+              <span v-else>DATA CUTI</span>
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <div class="modal-body">
-            <div class="data-cuti-wrapper">
+            <div v-if="pengesahan" class="data-cuti-wrapper">
+              <div class="form-group">
+                <label for="jenisCuti">Status Pengesahan</label>
+                <select class="form-control" id="jenisCuti" v-model="dataPengesahan.status" required>
+                  <option value="" hidden selected>&lt;Pilih Status Pengesahan&gt;</option>
+                  <option v-for="(status, index) in dataStatusPengesahan" :key="index" :value="index+1">{{ status }}</option>
+                </select>
+              </div>
+              <div class="form-group" v-if="dataPengesahan.status !== 1 && dataPengesahan.status !== ''">
+                <label for="lamaCuti">Lama Cuti</label>
+                <div id="lamaCuti">
+                  <Datepicker class="datepicker" :bootstrap-styling="true" :placeholder="'Tanggal awal'" :language="id" v-model="dataPengesahan.lamaCuti.tglAwal"></Datepicker>
+                  <span>s/d</span>
+                  <Datepicker class="datepicker" :bootstrap-styling="true" :language="id" :placeholder="'Tanggal akhir'" v-model="dataPengesahan.lamaCuti.tglAkhir"></Datepicker>
+                  <span>=</span>
+                  <input type="text" class="form-control" :placeholder="hariCuti" readonly>
+                  <span>hari</span>
+                </div>
+              </div>
+              <div class="form-group" v-if="dataPengesahan.status !== 1 && dataPengesahan.status !== ''">
+                <label for="alamatCuti">Alasan {{ dataStatusPengesahan[dataPengesahan.status - 1] }}</label>
+                <textarea class="form-control" id="alamatCuti" rows="2" v-model="dataPengesahan.alasan"></textarea>
+              </div>
+            </div>
+            <div v-else class="data-cuti-wrapper">
               <div class="form-group">
                 <label for="jenisCuti">Jenis Cuti Yang Diambil</label>
                 <select class="form-control" id="jenisCuti" v-model="cutiPegawai.jenisCuti" required>
@@ -88,8 +127,14 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            <button type="button" class="btn btn-primary" @click="showPopup()">Buat Cuti</button>
+            <div v-if="edit">
+              <button type="button" class="btn btn-primary" @click="showPopup()">Perbarui</button>
+              <button type="button" class="btn btn-success" data-dismiss="modal" @click="kirim()">Kirim</button>
+            </div>
+            <div v-else>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+              <button type="button" class="btn btn-primary" @click="showPopup()">Buat Cuti</button>
+            </div>
           </div>
         </div>
       </div>
@@ -104,7 +149,7 @@
       <template v-slot:footer>
         <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
         <div v-if="popup.isSuccess">
-          <button type="button" class="btn btn-primary" @click="buatCuti()" data-dismiss="modal">Simpan</button>
+          <button type="button" class="btn btn-primary" @click="edit ? updateCuti():buatCuti()" data-dismiss="modal">Simpan</button>
         </div>
       </template>
     </PopupInfo>
@@ -124,7 +169,14 @@ export default {
     Datepicker,
     PopupInfo
   },
-  props: ['dataPegawai', 'tambahCutiModal'],
+  props: {
+    dataPegawai: {},
+    tambahCutiModal: 0,
+    edit: false,
+    url: '',
+    data: {},
+    pengesahan: false
+  },
   data () {
     return {
       dataAtasan: [],
@@ -159,15 +211,45 @@ export default {
       popup: {
         onShow: false,
         isSuccess: false
+      },
+      dataStatusPengesahan: ['Disetujui', 'Perubahan', 'Ditangguhkan', 'Tidak Disetujui'],
+      dataPengesahan: {
+        status: '',
+        lamaCuti: {
+          tglAwal: '',
+          tglAkhir: '',
+          totalHari: 0
+        },
+        alasan: ''
       }
     }
   },
   watch: {
     hariCuti (val) {
       this.cutiPegawai.lamaCuti.totalHari = val
+      this.dataPengesahan.lamaCuti.totalHari = val
     },
-    tambahCutiModal () {
+    tambahCutiModal (val) {
       this.formReset()
+      if (this.edit) {
+        this.cutiPegawai = {
+          jenisCuti: this.data.idCuti,
+          alasanCuti: this.data.alasan,
+          lamaCuti: {
+            tglAwal: new Date(this.data.tglAwal),
+            tglAkhir: new Date(this.data.tglAkhir),
+            totalHari: this.data.totalHari
+          },
+          alamatCuti: this.data.alamat,
+          teleponCuti: this.data.nomorTelepon,
+          atasanLangsung: this.data.idAtasan,
+          pejabatBerwenang: this.data.idPejabat
+        }
+      } else if (this.pengesahan) {
+        this.dataPengesahan.lamaCuti.tglAwal = new Date(this.data.tglAwal)
+        this.dataPengesahan.lamaCuti.tglAkhir = new Date(this.data.tglAkhir)
+        this.dataPengesahan.lamaCuti.totalHari = this.data.totalHari
+      }
     }
   },
   computed: {
@@ -183,10 +265,14 @@ export default {
       return `${Math.floor(diffDays / 365)} Tahun ${Math.floor((diffDays % 365) / 30)} Bulan ${(diffDays % 365) % 30} Hari`
     },
     hariCuti () {
-      if ((this.cutiPegawai.lamaCuti.tglAwal === '' || this.cutiPegawai.lamaCuti.tglAkhir === '') || (this.cutiPegawai.lamaCuti.tglAwal > this.cutiPegawai.lamaCuti.tglAkhir)) return 0
-      let diffTime = Math.abs(this.cutiPegawai.lamaCuti.tglAkhir - this.cutiPegawai.lamaCuti.tglAwal)
+      if (this.pengesahan) {
+        if ((this.dataPengesahan.lamaCuti.tglAwal === '' || this.dataPengesahan.lamaCuti.tglAkhir === '') || (this.dataPengesahan.lamaCuti.tglAwal > this.dataPengesahan.lamaCuti.tglAkhir)) return 0
+      } else {
+        if ((this.cutiPegawai.lamaCuti.tglAwal === '' || this.cutiPegawai.lamaCuti.tglAkhir === '') || (this.cutiPegawai.lamaCuti.tglAwal > this.cutiPegawai.lamaCuti.tglAkhir)) return 0
+      }
+      let diffTime = this.pengesahan ? Math.abs(this.dataPengesahan.lamaCuti.tglAkhir - this.dataPengesahan.lamaCuti.tglAwal) : Math.abs(new Date(this.tglCuti.tglAkhir) - new Date(this.tglCuti.tglAwal))
       let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      return diffDays + 1
+      return diffDays
     },
     atasanLangsung () {
       if (this.dataPegawai.eselon !== '22') {
@@ -243,13 +329,22 @@ export default {
         atasanLangsung: '',
         pejabatBerwenang: ''
       }
+      this.dataPengesahan = {
+        status: '',
+        lamaCuti: {
+          tglAwal: '',
+          tglAkhir: '',
+          totalHari: 0
+        },
+        alasan: ''
+      }
     },
     buatCuti () {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: 'https://server.cuti.bkpsdmsitubondo.id',
-        // url: 'http://127.0.0.1/php_class/',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
         data: {
           onPost: 'InsertSurat',
           pegawai: parseInt(this.dataPegawai.id),
@@ -263,14 +358,56 @@ export default {
           atasanLangsung: parseInt(this.cutiPegawai.atasanLangsung),
           pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
         }
-      }).then(() => {
+      }).then((res) => {
         // console.log(res)
+        this.$emit('getSuratUsulan')
         // console.log('SUKSES')
       }).catch(() => {
         // console.log('GAGAL')
       })
       this.popup.onShow = !this.popup.onShow
       $('#exampleModalScrollable').modal('hide')
+    },
+    updateCuti () {
+      let tgl = this.tglCuti
+      axios({
+        method: 'post',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        data: {
+          onPost: 'UpdateSurat',
+          id: this.data.id,
+          jenisCuti: this.cutiPegawai.jenisCuti,
+          alasanCuti: this.cutiPegawai.alasanCuti,
+          tglAwal: tgl.tglAwal,
+          tglAkhir: tgl.tglAkhir,
+          totalHari: this.cutiPegawai.lamaCuti.totalHari,
+          alamatCuti: this.cutiPegawai.alamatCuti,
+          teleponCuti: this.cutiPegawai.teleponCuti,
+          atasanLangsung: parseInt(this.cutiPegawai.atasanLangsung),
+          pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
+        }
+      }).then((res) => {
+        console.log(res)
+        // console.log('SUKSES')
+      }).catch(() => {
+        // console.log('GAGAL')
+      })
+      this.popup.onShow = !this.popup.onShow
+      $('#exampleModalScrollable').modal('hide')
+    },
+    kirim () {
+      axios({
+        method: 'post',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        data: {
+          onPost: 'SetKirimCuti',
+          id: this.data.id
+        }
+      }).then(() => {
+        this.$emit('getSuratUsulan')
+      })
     },
     showPopup () {
       this.popup.isSuccess = this.isFormFullFilled
@@ -297,6 +434,9 @@ export default {
   .data-pribadi {
     flex-basis: 420px;
     margin-left: 10px;
+  }
+  .data-usulan {
+    flex-basis: 500px;
   }
   .text-footer {
     justify-content: start;

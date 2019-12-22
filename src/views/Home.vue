@@ -42,23 +42,26 @@ export default {
       this.button.masuk.disable = !this.button.masuk.disable
       axios({
         methods: 'get',
-        url: 'https://server.cuti.bkpsdmsitubondo.id/',
-        // url: 'http://127.0.0.1/php_class/',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+        url: 'http://127.0.0.1/php_class/',
         params: {
           onGet: 'UserLogin',
           nip: login.username,
           password: login.password
         }
       }).then(res => {
+        console.log(res)
         return res.data.loggedIn
       }).then(res => {
         if (res) {
           let aPegawai = allPegawai.find(el => { return el.nip === login.username })
           let atasan = []
           atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
-          do {
-            atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
-          } while (atasan[atasan.length - 1].atasan !== null)
+          if (atasan[0].atasan !== null) {
+            do {
+              atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
+            } while (atasan[atasan.length - 1].atasan !== null)
+          }
           atasan = atasan.filter(el => { return el.eselon !== '41' && el.eselon !== '42' })
           this.$session.set('onLogin', login.username)
           this.$router.push({
