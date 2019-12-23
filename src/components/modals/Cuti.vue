@@ -38,8 +38,32 @@
               </div>
             </div>
           </div>
-          <div class="modal-footer text-footer">
-            <p class="text-secondary" v-if="!edit && !pengesahan">* Jika ada kesalahan data, silakan hubungi Admin BKPSDM</p>
+          <div class="modal-footer text-footer row">
+            <div class="col-sm-5" v-if="edit && data.kirimSurat === '1'">
+              <h6 class="text-center"><strong>Disahkan oleh Atasan</strong></h6>
+              <div class="form-group">
+                <input type="text" class="form-control" :placeholder="data.pengesahanAtasan !== null ? data.pengesahanAtasan : 'Tanggal Pengesahan'" readonly>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" :placeholder="data.pengesahanAtasan !== null ? data.statusPengesahanAtasan : 'Status Pengesahan'" readonly>
+              </div>
+              <div class="form-group">
+                <textarea class="form-control" id="pengesahanAtasan" rows="3" :placeholder="data.pengesahanAtasan !== null ? data.pengesahanAtasan : 'Alasan'" readonly></textarea>
+              </div>
+            </div>
+            <div class="col-sm-5" v-if="edit && data.kirimSurat === '1'">
+              <h6 class="text-center"><strong>Disahkan oleh Pejabat</strong></h6>
+              <div class="form-group">
+                <input type="text" class="form-control" :placeholder="data.pengesahanPejabat !== null ? data.pengesahanPejabat : 'Tanggal Pengesahan'" readonly>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" :placeholder="data.pengesahanPejabat !== null ? data.statusPengesahanPejabat : 'Status Pengesahan'" readonly>
+              </div>
+              <div class="form-group">
+                <textarea class="form-control" id="pengesahanPejabat" rows="3" :placeholder="data.pengesahanPejabat !== null ? data.pengesahanPejabat : 'Alasan'" readonly></textarea>
+              </div>
+            </div>
+            <p class="text-secondary col-sm-12" v-if="!edit && !pengesahan">* Jika ada kesalahan data, silakan hubungi Admin BKPSDM</p>
           </div>
         </div>
       </div>
@@ -130,6 +154,10 @@
             <div v-if="edit">
               <button type="button" class="btn btn-primary" @click="showPopup()">Perbarui</button>
               <button type="button" class="btn btn-success" data-dismiss="modal" @click="kirim()">Kirim</button>
+            </div>
+            <div v-else-if="pengesahan">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+              <button type="button" class="btn btn-success" :disabled="dataPengesahan.status === ''" data-dismiss="modal" @click="setPengesahan()">Sahkan</button>
             </div>
             <div v-else>
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -412,6 +440,23 @@ export default {
     showPopup () {
       this.popup.isSuccess = this.isFormFullFilled
       this.popup.onShow = !this.popup.onShow
+    },
+    setPengesahan () {
+      // KURANG UPDATE TANGGAL NYA
+      axios({
+        method: 'post',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        data: {
+          onPost: 'SetPengesahan',
+          id: this.data.id,
+          pengesahan: this.dataPegawai.id,
+          statusPengesahan: this.dataPengesahan.status,
+          alasanPengesahan: this.dataPengesahan.alasan
+        }
+      }).then(() => {
+        this.$emit('getSuratPengesahan')
+      })
     }
   },
   created () {
@@ -439,7 +484,8 @@ export default {
     flex-basis: 500px;
   }
   .text-footer {
-    justify-content: start;
+    justify-content: center;
+    align-items: flex-start;
     p {
       font-size: 12px;
       font-weight: 600;

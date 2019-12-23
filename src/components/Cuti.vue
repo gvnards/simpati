@@ -9,7 +9,7 @@
         <div v-for="(nav, index) in tabs.nav" :key="index" :style="((dataPegawai.eselon === '' || dataPegawai.eselon.includes('4')) && nav === 'Pengesahan') ? 'cursor: not-allowed;':''" :class="nav===tabs.active ? 'active':''" @click="tabActive(nav)">{{ nav }}</div>
       </div>
     </div>
-    <div style="overflow: auto; max-height: 540px;">
+    <div class="table-wrapper">
       <table class="table table-hover">
         <thead>
           <tr>
@@ -32,12 +32,32 @@
             <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === '1' ? 'Terkirim':'Belum Terkirim' }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
+              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti'">Hapus</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <ModalCuti :tambahCutiModal="tambahCutiModal" :dataPegawai="dataPegawai" :edit="usulan.edit" :pengesahan="usulan.pengesahan" :url="usulan.url" :data="usulan.data" @getSuratUsulan="getSuratUsulan"></ModalCuti>
+    <!-- pagination -->
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" v-for="(item, index) in pagination.max" :key="index" :class="pagination.current === item ? 'disabled':''" @click="pagination.current = item">
+          <a class="page-link" href="#" :tabindex="pagination.current === item ? '-1':''">{{ item }}</a>
+        </li>
+      </ul>
+    </nav>
+    <!-- end pagination -->
+    <ModalCuti :tambahCutiModal="tambahCutiModal" :dataPegawai="dataPegawai" :edit="usulan.edit" :pengesahan="usulan.pengesahan" :url="usulan.url" :data="usulan.data" @getSuratUsulan="getSuratUsulan" @getSuratPengesahan="getSuratPengesahan"></ModalCuti>
+    <PopupInfo :onShow="popup.onShow">
+      <template v-slot:title>
+        <span>Konfirmasi Data</span>
+      </template>
+      <p>Apakah Anda yakin untuk menghapus usulan ini ?</p>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-danger" @click="popup.onShow = !popup.onShow; deleteUsulan(delUsulan);" data-dismiss="modal">Hapus</button>
+      </template>
+    </PopupInfo>
   </div>
 </template>
 
@@ -47,11 +67,13 @@ import ModalShowUsulan from '@/components/modals/ShowUsulan.vue'
 import allPegawai from '@/store/pegawai.json'
 import allPangkat from '@/store/pangkat.json'
 import axios from 'axios'
+import PopupInfo from '@/components/modals/PopupInfo.vue'
 
 export default {
   components: {
     ModalCuti,
-    ModalShowUsulan
+    ModalShowUsulan,
+    PopupInfo
   },
   props: ['currMenu', 'dataPegawai'],
   data () {
@@ -67,15 +89,37 @@ export default {
         active: 'Usulan Cuti',
         nav: ['Usulan Cuti', 'Pengesahan']
       },
-      dataSurat: []
+      dataSurat: [],
+      popup: {
+        onShow: false
+      },
+      delUsulan: {},
+      pagination: {
+        current: 1,
+        max: 1,
+        fetch: 10 // maksimal get surat
+      }
     }
   },
   watch: {
     'tabs.active' (val) {
       if (val === 'Usulan Cuti') {
+        this.pagination.current = 1
         this.getSuratUsulan()
+        this.getCountSuratUsulan()
+      } else {
+        this.pagination.current = 1
+        this.getSuratPengesahan()
+        this.getCountSuratPengesahan()
+      }
+    },
+    'pagination.current' (val) {
+      if (this.tabs.active === 'Usulan Cuti') {
+        this.getSuratUsulan()
+        this.getCountSuratUsulan()
       } else {
         this.getSuratPengesahan()
+        this.getCountSuratPengesahan()
       }
     }
   },
@@ -104,10 +148,25 @@ export default {
         url: 'http://127.0.0.1/php_class/',
         params: {
           onGet: 'GetSurat',
-          pegawai: this.dataPegawai.id
+          pegawai: this.dataPegawai.id,
+          current: (this.pagination.current - 1) * this.pagination.fetch,
+          fetch: this.pagination.fetch
         }
       }).then(res => {
         this.dataSurat = res.data.surat
+      })
+    },
+    getCountSuratUsulan () {
+      axios({
+        method: 'get',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        params: {
+          onGet: 'CountSurat',
+          pegawai: this.dataPegawai.id
+        }
+      }).then(res => {
+        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
       })
     },
     getSuratPengesahan () {
@@ -118,11 +177,26 @@ export default {
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
+          pengesahan: true,
+          current: (this.pagination.current - 1) * this.pagination.fetch,
+          fetch: this.pagination.fetch
+        }
+      }).then(res => {
+        this.dataSurat = res.data.surat
+      })
+    },
+    getCountSuratPengesahan () {
+      axios({
+        method: 'get',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        params: {
+          onGet: 'CountSurat',
+          pegawai: this.dataPegawai.id,
           pengesahan: true
         }
       }).then(res => {
-        console.log(res.data)
-        this.dataSurat = res.data.surat
+        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
       })
     },
     onShowUsulan (data) {
@@ -170,20 +244,25 @@ export default {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
       })
+    },
+    deleteUsulan (data) {
+      axios({
+        method: 'post',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        data: {
+          onPost: 'DeleteUsulan',
+          id: data.id
+        }
+      }).then(() => {
+        this.getSuratUsulan()
+        this.getCountSuratUsulan()
+      })
     }
   },
   created () {
-    axios({
-      method: 'get',
-      // url: 'https://server.cuti.bkpsdmsitubondo.id',
-      url: 'http://127.0.0.1/php_class/',
-      params: {
-        onGet: 'GetSurat',
-        pegawai: this.dataPegawai.id
-      }
-    }).then(res => {
-      this.dataSurat = res.data.surat
-    })
+    this.getSuratUsulan()
+    this.getCountSuratUsulan()
   }
 }
 </script>
@@ -209,6 +288,25 @@ export default {
       height: 16px;
       margin-bottom: 4px;
       margin-right: 6px;
+    }
+  }
+}
+.table-wrapper {
+  overflow: auto;
+  height: 540px;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  &::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #EEEEEE;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #DADADA;
+    &:hover {
+      background-color: #AAAAAA;
     }
   }
 }

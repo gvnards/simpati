@@ -19,8 +19,8 @@
               <p class="subTitle">{{ $lang.login.subTitle }}</p>
               <div class="form-container">
                 <div class="form-group">
-                  <input v-model="login.username" type="text" class="form-control" :placeholder="`${$lang.input.placeholder.username} (${$lang.input.placeholder.nip})`">
-                  <input v-model="login.password" type="password" class="form-control" :placeholder="`${$lang.input.placeholder.password} (tahun-bulan-tanggal lahir)`">
+                  <input v-model="login.username" type="text" class="form-control" :placeholder="$lang.input.placeholder.username">
+                  <input v-model="login.password" type="password" class="form-control" :placeholder="$lang.input.placeholder.password">
                 </div>
                 <button type="button" class="btn btn-primary btn-md btn-block text-uppercase" :disabled="button.masuk.disable" @click="$emit('login', login)">{{ $lang.button.masuk }}</button>
               </div>
