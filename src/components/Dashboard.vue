@@ -1,5 +1,101 @@
 <template>
   <div>
-    Dasbor
+    <div class="row">
+      <div class="col-sm-3 cuti-wrapper" v-for="(jenis, index) in cuti.jenis" :key="index">
+        <div class="card">
+          <div class="row">
+            <div class="col-sm-10 jenis-cuti" :style="`color: ${cuti.color[index]}`">
+              {{ jenis.toUpperCase() }}
+            </div>
+            <div class="col-sm-2 sisa">
+              <p class="text-center">
+                <span>maksimal</span>
+                <br>
+                <span :style="`color: ${cuti.color[index]}`">{{ cuti.sisa[index] }}</span>
+                <br>
+                <span>hari</span>
+              </p>
+            </div>
+          </div>
+          <div class="cuti-footer">
+            <img src="@/assets/ico/time.svg" alt="" srcset="">
+            <span>terhitung pada tahun {{ currentYear }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
+<script>
+export default {
+  data () {
+    return {
+      cuti: {
+        jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
+        sisa: [12, '-', 30, '-', '-', '-'],
+        color: ['#1E6E8F', '#1E8F5A', '#8F1E1E', '#8F571E', '#8F8F1E']
+      }
+    }
+  },
+  computed: {
+    currentYear () {
+      return new Date(Date.now()).getFullYear()
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.cuti-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  cursor: default;
+}
+.card {
+  position: relative;
+  height: 120px;
+  width: 240px;
+  padding: 0px 10px;
+  &::before {
+    content: "CUTI";
+    position: absolute;
+    bottom: -4px;
+    font-size: 82px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 600;
+    color: rgba(240, 240, 240, 0.4);
+  }
+}
+.sisa {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  span {
+    font-size: 14px;
+    color: #C4C4C4;
+  }
+  p span:nth-child(3) {
+    color: initial;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+.jenis-cuti {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+.cuti-footer {
+  border-top: 1px solid #C4C4C4;
+  font-size: 12px;
+  color: #C4C4C4;
+  img {
+    width: 14px;
+    vertical-align: sub;
+  }
+}
+</style>

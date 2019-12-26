@@ -3,10 +3,10 @@
     <!-- Modal -->
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
       <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== '1') ? 'data-pribadi' : 'data-usulan'">
-        <div class="modal-content">
+        <div class="modal-content" style="overflow: hidden;">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
-              <span v-if="edit">Usulan Cuti</span>
+              <span v-if="edit || pengesahan">Usulan Cuti</span>
               <span v-else>DATA PRIBADI</span>
             </h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -300,7 +300,14 @@ export default {
       }
       let diffTime = this.pengesahan ? Math.abs(this.dataPengesahan.lamaCuti.tglAkhir - this.dataPengesahan.lamaCuti.tglAwal) : Math.abs(new Date(this.tglCuti.tglAkhir) - new Date(this.tglCuti.tglAwal))
       let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      return diffDays
+      let tempCountDay = 0
+      for (let i = 0; i < diffDays; i++) {
+        let date = new Date(new Date(this.tglCuti.tglAwal).getTime() + (i * 86400000)).getDay()
+        if (date !== 0 && date !== 6) {
+          tempCountDay++
+        }
+      }
+      return tempCountDay
     },
     atasanLangsung () {
       if (this.dataPegawai.eselon !== '22') {

@@ -4,6 +4,15 @@
       <p>{{ currMenu[1] }} <span>Daftar {{ currMenu[1] }} Pribadi</span></p>
       <button class="btn btn-sm btn-primary btn-add" @click="tambahCuti()" data-toggle="modal" data-target="#exampleModalScrollable"><img src="./../assets/ico/add.svg" alt="" srcset="">Tambah</button>
     </div>
+    <div class="saring-wrapper">
+      <p>Saring</p>
+      <div class="form-group saring-tahun">
+        <select class="form-control" id="atasanLangsung" v-model="saring.tahun" required>
+          <option value="" hidden selected>Pilih Tahun</option>
+          <option v-for="(tahun, index) in listYear" :key="index" :value="tahun" @click="tabs.active === 'Usulan Cuti' ? getSuratUsulan() : ''">{{ tahun }}</option>
+        </select>
+      </div>
+    </div>
     <div class="tab">
       <div class="tab-nav">
         <div v-for="(nav, index) in tabs.nav" :key="index" :style="((dataPegawai.eselon === '' || dataPegawai.eselon.includes('4')) && nav === 'Pengesahan') ? 'cursor: not-allowed;':''" :class="nav===tabs.active ? 'active':''" @click="tabActive(nav)">{{ nav }}</div>
@@ -63,7 +72,6 @@
 
 <script>
 import ModalCuti from '@/components/modals/Cuti.vue'
-import ModalShowUsulan from '@/components/modals/ShowUsulan.vue'
 import allPegawai from '@/store/pegawai.json'
 import allPangkat from '@/store/pangkat.json'
 import axios from 'axios'
@@ -72,12 +80,14 @@ import PopupInfo from '@/components/modals/PopupInfo.vue'
 export default {
   components: {
     ModalCuti,
-    ModalShowUsulan,
     PopupInfo
   },
   props: ['currMenu', 'dataPegawai'],
   data () {
     return {
+      saring: {
+        tahun: ''
+      },
       tambahCutiModal: 0,
       usulan: {
         edit: false,
@@ -123,7 +133,24 @@ export default {
       }
     }
   },
+  computed: {
+    listMonth () {
+      return ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'Nopember', 'Desember']
+    },
+    listYear () {
+      let now = new Date(Date.now()).getFullYear()
+      return [now, now - 1, now - 2]
+    }
+  },
   methods: {
+    masaKerja (data) {
+      let tmt = data.nip.slice(8, 14)
+      tmt = new Date(`${tmt.slice(4)}/01/${tmt.slice(0, 4)}`)
+      let dateNow = new Date(Date.now())
+      let diffTime = Math.abs(dateNow - tmt)
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return `${Math.floor(diffDays / 365)} Tahun ${Math.floor((diffDays % 365) / 30)} Bulan ${(diffDays % 365) % 30} Hari`
+    },
     namaPegawai (item) {
       return allPegawai.find(el => { return el.id === item.idPegawai }).nama
     },
@@ -150,7 +177,8 @@ export default {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
           current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch
+          fetch: this.pagination.fetch,
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
         this.dataSurat = res.data.surat
@@ -163,7 +191,8 @@ export default {
         url: 'http://127.0.0.1/php_class/',
         params: {
           onGet: 'CountSurat',
-          pegawai: this.dataPegawai.id
+          pegawai: this.dataPegawai.id,
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
         this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
@@ -179,7 +208,8 @@ export default {
           pegawai: this.dataPegawai.id,
           pengesahan: true,
           current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch
+          fetch: this.pagination.fetch,
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
         this.dataSurat = res.data.surat
@@ -193,7 +223,8 @@ export default {
         params: {
           onGet: 'CountSurat',
           pegawai: this.dataPegawai.id,
-          pengesahan: true
+          pengesahan: true,
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
         this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
@@ -214,18 +245,23 @@ export default {
       let pegawai = pegawais.find(el => { return el.id === data.idPegawai })
       let atasan = pegawais.find(el => { return el.id === data.idAtasan })
       let pejabat = pegawais.find(el => { return el.id === data.idPejabat })
-      console.log(data)
+      // console.log(data)
+      // console.log(pegawai)
+      let tanggalSurat = new Date(data.createdAt)
       axios({
         // url: 'https://cuti.bkpsdmsitubondo.id/pdf/',
         url: 'http://127.0.0.1/fpdf/',
         method: 'get',
         responseType: 'blob',
         params: {
+          tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
           nip_pegawai: pegawai.nip,
           nama_pegawai: pegawai.nama,
           jabatan_pegawai: pegawai.nama_jabatan,
           pangkat_pegawai: allPangkat[pegawai.GOL_NAMA],
           golongan_pegawai: pegawai.GOL_NAMA,
+          masa_kerja_pegawai: this.masaKerja(pegawai),
+          opd_pegawai: pegawai.nama_opd,
           jenis_cuti: data.jenis,
           alasan_cuti: data.alasan,
           alamat_cuti: data.alamat,
@@ -258,6 +294,13 @@ export default {
         this.getSuratUsulan()
         this.getCountSuratUsulan()
       })
+    },
+    dateDayToString (day) {
+      let listDay = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu']
+      return listDay[day]
+    },
+    dateMonthToString (month) {
+      return this.listMonth[month]
     }
   },
   created () {
@@ -329,6 +372,22 @@ export default {
         color: #4d4d4d;
       }
     }
+  }
+}
+.saring-wrapper {
+  margin: 10px 0px;
+  display: flex;
+  align-items: center;
+  p {
+    color: #747474;
+  }
+  .saring-bulan {
+    width: 180px;
+    margin-left: 10px;
+  }
+  .saring-tahun {
+    width: 140px;
+    margin-left: 20px;
   }
 }
 </style>
