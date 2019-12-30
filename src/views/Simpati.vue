@@ -1,7 +1,7 @@
 <template>
   <div id="simpati">
     <Menu class="a" :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
-    <Content :dataPegawai="dataPegawai" :currMenu="currMenu" />
+    <Content class="b" :dataPegawai="dataPegawai" :currMenu="currMenu" />
   </div>
 </template>
 
@@ -73,6 +73,25 @@ export default {
   display: flex;
   .a {
     min-width: 240px;
+  }
+  .b {
+    overflow: auto;
+    max-height: 100vh;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    &::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #EEEEEE;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #DADADA;
+      &:hover {
+        background-color: #AAAAAA;
+      }
+    }
   }
 }
 </style>

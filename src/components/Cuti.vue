@@ -9,7 +9,7 @@
       <div class="form-group saring-tahun">
         <select class="form-control" id="atasanLangsung" v-model="saring.tahun" required>
           <option value="" hidden selected>Pilih Tahun</option>
-          <option v-for="(tahun, index) in listYear" :key="index" :value="tahun" @click="tabs.active === 'Usulan Cuti' ? getSuratUsulan() : ''">{{ tahun }}</option>
+          <option v-for="(tahun, index) in listYear" :key="index" :value="tahun">{{ tahun }}</option>
         </select>
       </div>
     </div>
@@ -131,6 +131,12 @@ export default {
         this.getSuratPengesahan()
         this.getCountSuratPengesahan()
       }
+    },
+    'saring.tahun' () {
+      if (this.tabs.active === 'Usulan Cuti') {
+        this.getSuratUsulan()
+        this.getCountSuratUsulan()
+      }
     }
   },
   computed: {
@@ -245,7 +251,7 @@ export default {
       let pegawai = pegawais.find(el => { return el.id === data.idPegawai })
       let atasan = pegawais.find(el => { return el.id === data.idAtasan })
       let pejabat = pegawais.find(el => { return el.id === data.idPejabat })
-      // console.log(data)
+      console.log(data)
       // console.log(pegawai)
       let tanggalSurat = new Date(data.createdAt)
       axios({
@@ -272,9 +278,15 @@ export default {
           nip_atasan: atasan.nip,
           nama_atasan: atasan.nama,
           jabatan_atasan: atasan.nama_jabatan,
+          pangkat_atasan: allPangkat[atasan.GOL_NAMA],
+          pengesahan_atasan: data.statusPengesahanAtasan,
+          alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
           nip_pejabat: pejabat.nip,
           nama_pejabat: pejabat.nama,
-          jabatan_pejabat: pejabat.nama_jabatan
+          jabatan_pejabat: pejabat.nama_jabatan,
+          pangkat_pejabat: allPangkat[pejabat.GOL_NAMA],
+          pengesahan_pejabat: data.statusPengesahanPejabat,
+          alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
         }
       }).then(res => {
         let urls = window.URL.createObjectURL(res.data)

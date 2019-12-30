@@ -39,30 +39,6 @@
             </div>
           </div>
           <div class="modal-footer text-footer row">
-            <div class="col-sm-5" v-if="edit && data.kirimSurat === '1'">
-              <h6 class="text-center"><strong>Disahkan oleh Atasan</strong></h6>
-              <div class="form-group">
-                <input type="text" class="form-control" :placeholder="data.pengesahanAtasan !== null ? data.pengesahanAtasan : 'Tanggal Pengesahan'" readonly>
-              </div>
-              <div class="form-group">
-                <input type="text" class="form-control" :placeholder="data.pengesahanAtasan !== null ? data.statusPengesahanAtasan : 'Status Pengesahan'" readonly>
-              </div>
-              <div class="form-group">
-                <textarea class="form-control" id="pengesahanAtasan" rows="3" :placeholder="data.pengesahanAtasan !== null ? data.pengesahanAtasan : 'Alasan'" readonly></textarea>
-              </div>
-            </div>
-            <div class="col-sm-5" v-if="edit && data.kirimSurat === '1'">
-              <h6 class="text-center"><strong>Disahkan oleh Pejabat</strong></h6>
-              <div class="form-group">
-                <input type="text" class="form-control" :placeholder="data.pengesahanPejabat !== null ? data.pengesahanPejabat : 'Tanggal Pengesahan'" readonly>
-              </div>
-              <div class="form-group">
-                <input type="text" class="form-control" :placeholder="data.pengesahanPejabat !== null ? data.statusPengesahanPejabat : 'Status Pengesahan'" readonly>
-              </div>
-              <div class="form-group">
-                <textarea class="form-control" id="pengesahanPejabat" rows="3" :placeholder="data.pengesahanPejabat !== null ? data.pengesahanPejabat : 'Alasan'" readonly></textarea>
-              </div>
-            </div>
             <p class="text-secondary col-sm-12" v-if="!edit && !pengesahan">* Jika ada kesalahan data, silakan hubungi Admin BKPSDM</p>
           </div>
         </div>
@@ -302,7 +278,7 @@ export default {
       let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
       let tempCountDay = 0
       for (let i = 0; i < diffDays; i++) {
-        let date = new Date(new Date(this.tglCuti.tglAwal).getTime() + (i * 86400000)).getDay()
+        let date = this.pengesahan ? new Date(new Date(this.dataPengesahan.lamaCuti.tglAwal).getTime() + (i * 86400000)).getDay() : new Date(new Date(this.tglCuti.tglAwal).getTime() + (i * 86400000)).getDay()
         if (date !== 0 && date !== 6) {
           tempCountDay++
         }

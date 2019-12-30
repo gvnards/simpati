@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row">
-      <div class="col-sm-3 cuti-wrapper" v-for="(jenis, index) in cuti.jenis" :key="index">
+      <div class="col-lg-3 cuti-wrapper" v-for="(jenis, index) in cuti.jenis" :key="index">
         <div class="card">
           <div class="row">
             <div class="col-sm-10 jenis-cuti" :style="`color: ${cuti.color[index]}`">
