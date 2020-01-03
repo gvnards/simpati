@@ -15,7 +15,13 @@
           </div>
           <div class="modal-body">
             <div v-if="edit || pengesahan">
-              <embed :src="url" type="application/pdf" style="width: 100%; height: 360px;">
+              <div class="tab">
+                <div class="tab-nav">
+                  <div v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
+                </div>
+              </div>
+              <!-- <embed :src="tabs.active==='Surat Usulan' ? url:'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'+data.berkas" type="application/pdf" style="width: 100%; height: 360px;"> -->
+              <embed :src="tabs.active==='Surat Usulan' ? url:'http://127.0.0.1/upload/berkas/cuti/'+data.berkas" type="application/pdf" style="width: 100%; height: 360px;">
             </div>
             <div v-else class="data-asn-wrapper">
               <div class="form-group">
@@ -124,6 +130,13 @@
                   <option v-for="(pejabat, index) in pejabatBerwenang" :key="index" :value="pejabat.id">{{ pejabat.nama }} - {{ pejabat.nama_jabatan }}</option>
                 </select>
               </div>
+              <div class="form-group" v-if="cutiPegawai.jenisCuti !== '' && cutiPegawai.jenisCuti !== 1">
+                <label>Pilih Berkas Pendukung</label>
+                <div class="custom-file">
+                  <input type="file" accept="application/pdf" class="custom-file-input" id="customFile" ref="berkasPendukung" @change="uploadBerkasPendukung()">
+                  <label class="custom-file-label" for="customFile">{{ cutiPegawai.berkasPendukung.name === undefined ? cutiPegawai.berkasPendukung : cutiPegawai.berkasPendukung.name }}</label>
+                </div>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -183,6 +196,10 @@ export default {
   },
   data () {
     return {
+      tabs: {
+        nav: ['Surat Usulan', 'Berkas Pendukung'],
+        active: 'Surat Usulan'
+      },
       dataAtasan: [],
       id: id,
       window: {
@@ -210,7 +227,8 @@ export default {
         alamatCuti: '',
         teleponCuti: '',
         atasanLangsung: '',
-        pejabatBerwenang: ''
+        pejabatBerwenang: '',
+        berkasPendukung: ''
       },
       popup: {
         onShow: false,
@@ -247,7 +265,8 @@ export default {
           alamatCuti: this.data.alamat,
           teleponCuti: this.data.nomorTelepon,
           atasanLangsung: this.data.idAtasan,
-          pejabatBerwenang: this.data.idPejabat
+          pejabatBerwenang: this.data.idPejabat,
+          berkasPendukung: this.data.berkas
         }
       } else if (this.pengesahan) {
         this.dataPengesahan.lamaCuti.tglAwal = new Date(this.data.tglAwal)
@@ -322,6 +341,10 @@ export default {
     }
   },
   methods: {
+    uploadBerkasPendukung () {
+      console.log(this.$refs.berkasPendukung.files[0])
+      this.cutiPegawai.berkasPendukung = this.$refs.berkasPendukung.files[0]
+    },
     handleResize () {
       this.window.width = window.innerWidth
       this.window.height = window.innerHeight
@@ -338,7 +361,8 @@ export default {
         alamatCuti: '',
         teleponCuti: '',
         atasanLangsung: '',
-        pejabatBerwenang: ''
+        pejabatBerwenang: '',
+        berkasPendukung: ''
       }
       this.dataPengesahan = {
         status: '',
@@ -349,6 +373,7 @@ export default {
         },
         alasan: ''
       }
+      this.tabs.active = 'Surat Usulan'
     },
     buatCuti () {
       let tgl = this.tglCuti
@@ -371,7 +396,7 @@ export default {
         }
       }).then((res) => {
         // console.log(res)
-        this.$emit('getSuratUsulan')
+        this.uploadBerkas()
         // console.log('SUKSES')
       }).catch(() => {
         // console.log('GAGAL')
@@ -379,7 +404,43 @@ export default {
       this.popup.onShow = !this.popup.onShow
       $('#exampleModalScrollable').modal('hide')
     },
+    uploadBerkas () {
+      let formData = new FormData()
+      formData.append('file', this.cutiPegawai.berkasPendukung)
+      formData.append('onPost', 'InsertBerkas')
+      formData.append('jenisCuti', this.cutiPegawai.jenisCuti)
+      formData.append('pegawai', parseInt(this.dataPegawai.id))
+      axios({
+        method: 'post',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(res => {
+        console.log(res)
+        this.$emit('getSuratUsulan')
+      })
+    },
     updateCuti () {
+      if (this.cutiPegawai.berkasPendukung.name !== undefined) {
+        let formData = new FormData()
+        let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'currentPath', 'oldFile', 'id']
+        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, parseInt(this.dataPegawai.id), '../upload/berkas/cuti/', this.data.berkas, this.data.id]
+        for (let i = 0; i < k.length; i++) {
+          formData.append(k[i], v[i])
+        }
+        axios({
+          method: 'post',
+          // url: 'https://server.cuti.bkpsdmsitubondo.id',
+          url: 'http://127.0.0.1/php_class/',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+      }
       let tgl = this.tglCuti
       axios({
         method: 'post',
@@ -399,7 +460,7 @@ export default {
           pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
         }
       }).then((res) => {
-        console.log(res)
+        this.$emit('getSuratUsulan')
         // console.log('SUKSES')
       }).catch(() => {
         // console.log('GAGAL')
@@ -506,6 +567,28 @@ input, textarea {
     }
     input {
       width: 80px;
+    }
+  }
+}
+.tab {
+  margin-bottom: 2px;
+  .tab-nav {
+    div {
+      display: inline-block;
+      padding-bottom: 10px;
+      margin-right: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #747474;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      &.active {
+        color: black !important;
+        border-bottom: 2px solid black;
+      }
+      &:hover {
+        color: #4d4d4d;
+      }
     }
   }
 }

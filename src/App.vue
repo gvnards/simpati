@@ -15,7 +15,7 @@ export default {
         if (idleTime > 14) {
           this.$session.clear()
           this.$session.destroy()
-          this.$router.push('/')
+          location.reload()
         }
       }, 60000)
       document.addEventListener('keypress', (ev) => {

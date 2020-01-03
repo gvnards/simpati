@@ -4,10 +4,10 @@
       <div class="col-lg-3 cuti-wrapper" v-for="(jenis, index) in cuti.jenis" :key="index">
         <div class="card">
           <div class="row">
-            <div class="col-sm-10 jenis-cuti" :style="`color: ${cuti.color[index]}`">
+            <div class="col-sm-8 jenis-cuti" :style="`color: ${cuti.color[index]}`">
               {{ jenis.toUpperCase() }}
             </div>
-            <div class="col-sm-2 sisa">
+            <div class="col-sm-4 sisa">
               <p class="text-center">
                 <span>maksimal</span>
                 <br>
@@ -55,7 +55,7 @@ export default {
 }
 .card {
   position: relative;
-  height: 120px;
+  min-height: 120px;
   width: 240px;
   padding: 0px 10px;
   &::before {
@@ -72,7 +72,7 @@ export default {
 .sisa {
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: center;
   span {
     font-size: 14px;
     color: #C4C4C4;
