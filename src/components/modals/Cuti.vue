@@ -21,7 +21,7 @@
                 </div>
               </div>
               <!-- <embed :src="tabs.active==='Surat Usulan' ? url:'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'+data.berkas" type="application/pdf" style="width: 100%; height: 360px;"> -->
-              <embed :src="tabs.active==='Surat Usulan' ? url:'http://127.0.0.1/upload/berkas/cuti/'+data.berkas" type="application/pdf" style="width: 100%; height: 360px;">
+              <embed :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
             </div>
             <div v-else class="data-asn-wrapper">
               <div class="form-group">
@@ -135,6 +135,7 @@
                 <div class="custom-file">
                   <input type="file" accept="application/pdf" class="custom-file-input" id="customFile" ref="berkasPendukung" @change="uploadBerkasPendukung()">
                   <label class="custom-file-label" for="customFile">{{ cutiPegawai.berkasPendukung.name === undefined ? cutiPegawai.berkasPendukung : cutiPegawai.berkasPendukung.name }}</label>
+                  <div class="invalid-feedback">* ukuran berkas maksimal 200KB</div>
                 </div>
               </div>
             </div>
@@ -196,6 +197,7 @@ export default {
   },
   data () {
     return {
+      urlBerkasPendukung: '',
       tabs: {
         nav: ['Surat Usulan', 'Berkas Pendukung'],
         active: 'Surat Usulan'
@@ -273,6 +275,21 @@ export default {
         this.dataPengesahan.lamaCuti.tglAkhir = new Date(this.data.tglAkhir)
         this.dataPengesahan.lamaCuti.totalHari = this.data.totalHari
       }
+    },
+    'tabs.active' (val) {
+      if (val === 'Berkas Pendukung') {
+        axios({
+          method: 'get',
+          url: 'http://127.0.0.1/upload/berkas/cuti/',
+          responseType: 'blob',
+          params: {
+            data: this.data.berkas
+          }
+        }).then(res => {
+          let urls = window.URL.createObjectURL(res.data)
+          this.urlBerkasPendukung = urls
+        })
+      }
     }
   },
   computed: {
@@ -342,7 +359,11 @@ export default {
   },
   methods: {
     uploadBerkasPendukung () {
-      console.log(this.$refs.berkasPendukung.files[0])
+      console.log(this.$refs.berkasPendukung.files[0].size)
+      if (this.$refs.berkasPendukung.files[0].size > 204800) {
+        alert('File terlalu besar')
+        return
+      }
       this.cutiPegawai.berkasPendukung = this.$refs.berkasPendukung.files[0]
     },
     handleResize () {
