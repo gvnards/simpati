@@ -33,7 +33,7 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in dataSurat" :key="index">
-            <th scope="row" class="text-center">{{ ((pagination.current - 1) * 10) + (index + 1) }}</th>
+            <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
             <td class="text-center" v-if="tabs.active!=='Usulan Cuti'">{{ namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
             <td>{{ item.alasan }}</td>

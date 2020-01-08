@@ -17,10 +17,10 @@
             <div v-if="edit || pengesahan">
               <div class="tab">
                 <div class="tab-nav">
-                  <div v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
+                  <div v-if="cutiPegawai.berkasPendukung===''" class="active" @click="tabs.active=tabs.nav[0]">{{ tabs.nav[0] }}</div>
+                  <div v-else v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
                 </div>
               </div>
-              <!-- <embed :src="tabs.active==='Surat Usulan' ? url:'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'+data.berkas" type="application/pdf" style="width: 100%; height: 360px;"> -->
               <embed :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
             </div>
             <div v-else class="data-asn-wrapper">
@@ -142,8 +142,8 @@
           </div>
           <div class="modal-footer">
             <div v-if="edit">
-              <button type="button" class="btn btn-primary" @click="showPopup()">Perbarui</button>
-              <button type="button" class="btn btn-success" data-dismiss="modal" @click="kirim()">Kirim</button>
+              <button type="button" class="btn btn-outline-primary" @click="showPopup(); isKirim = false;">Perbarui</button>
+              <button type="button" class="btn btn-success" @click="showPopup(); isKirim = !isKirim;">Kirim</button>
             </div>
             <div v-else-if="pengesahan">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -167,7 +167,8 @@
       <template v-slot:footer>
         <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
         <div v-if="popup.isSuccess">
-          <button type="button" class="btn btn-primary" @click="edit ? updateCuti():buatCuti()" data-dismiss="modal">Simpan</button>
+          <button v-if="!isKirim" type="button" class="btn btn-primary" @click="edit ? updateCuti():buatCuti()" data-dismiss="modal">Simpan</button>
+          <button v-else type="button" class="btn btn-primary" @click="kirim()" data-dismiss="modal">Proses</button>
         </div>
       </template>
     </PopupInfo>
@@ -197,6 +198,7 @@ export default {
   },
   data () {
     return {
+      isKirim: false,
       urlBerkasPendukung: '',
       tabs: {
         nav: ['Surat Usulan', 'Berkas Pendukung'],
@@ -280,6 +282,7 @@ export default {
       if (val === 'Berkas Pendukung') {
         axios({
           method: 'get',
+          // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
           url: 'http://127.0.0.1/upload/berkas/cuti/',
           responseType: 'blob',
           params: {
@@ -336,12 +339,18 @@ export default {
     tglCuti () {
       let year, month, day
       let tglAwal = this.cutiPegawai.lamaCuti.tglAwal
+      if (this.pengesahan) {
+        tglAwal = this.dataPengesahan.lamaCuti.tglAwal
+      }
       year = tglAwal.getFullYear().toString().length > 1 ? tglAwal.getFullYear().toString() : `0${tglAwal.getFullYear().toString()}`
       month = (tglAwal.getMonth() + 1).toString().length > 1 ? (tglAwal.getMonth() + 1).toString() : `0${(tglAwal.getMonth() + 1).toString()}`
       day = tglAwal.getDate().toString().length > 1 ? tglAwal.getDate().toString() : `0${tglAwal.getDate().toString()}`
       tglAwal = `${year}/${month}/${day} 00:00:00`
 
       let tglAkhir = this.cutiPegawai.lamaCuti.tglAkhir
+      if (this.pengesahan) {
+        tglAkhir = this.dataPengesahan.lamaCuti.tglAkhir
+      }
       year = tglAkhir.getFullYear().toString().length > 1 ? tglAkhir.getFullYear().toString() : `0${tglAkhir.getFullYear().toString()}`
       month = (tglAkhir.getMonth() + 1).toString().length > 1 ? (tglAkhir.getMonth() + 1).toString() : `0${(tglAkhir.getMonth() + 1).toString()}`
       day = tglAkhir.getDate().toString().length > 1 ? tglAkhir.getDate().toString() : `0${tglAkhir.getDate().toString()}`
@@ -371,6 +380,7 @@ export default {
       this.window.height = window.innerHeight
     },
     formReset () {
+      this.isKirim = false
       this.cutiPegawai = {
         jenisCuti: '',
         alasanCuti: '',
@@ -447,8 +457,8 @@ export default {
     updateCuti () {
       if (this.cutiPegawai.berkasPendukung.name !== undefined) {
         let formData = new FormData()
-        let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'currentPath', 'oldFile', 'id']
-        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, parseInt(this.dataPegawai.id), '../upload/berkas/cuti/', this.data.berkas, this.data.id]
+        let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'oldFile', 'id']
+        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, parseInt(this.dataPegawai.id), this.data.berkas, this.data.id]
         for (let i = 0; i < k.length; i++) {
           formData.append(k[i], v[i])
         }
@@ -499,15 +509,19 @@ export default {
           id: this.data.id
         }
       }).then(() => {
+        this.popup.onShow = !this.popup.onShow
+        this.isKirim = !this.isKirim
         this.$emit('getSuratUsulan')
       })
+      this.popup.onShow = !this.popup.onShow
+      $('#exampleModalScrollable').modal('hide')
     },
     showPopup () {
       this.popup.isSuccess = this.isFormFullFilled
       this.popup.onShow = !this.popup.onShow
     },
     setPengesahan () {
-      // KURANG UPDATE TANGGAL NYA
+      let tgl = this.tglCuti
       axios({
         method: 'post',
         // url: 'https://server.cuti.bkpsdmsitubondo.id',
@@ -517,9 +531,13 @@ export default {
           id: this.data.id,
           pengesahan: this.dataPegawai.id,
           statusPengesahan: this.dataPengesahan.status,
-          alasanPengesahan: this.dataPengesahan.alasan
+          alasanPengesahan: this.dataPengesahan.alasan,
+          tglAwal: tgl.tglAwal,
+          tglAkhir: tgl.tglAkhir,
+          totalHari: this.dataPengesahan.lamaCuti.totalHari
         }
-      }).then(() => {
+      }).then((res) => {
+        console.log(res)
         this.$emit('getSuratPengesahan')
       })
     }
