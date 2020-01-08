@@ -88,18 +88,18 @@
             </div>
             <div v-else class="data-cuti-wrapper">
               <div class="form-group">
-                <label for="jenisCuti">Jenis Cuti Yang Diambil</label>
+                <label for="jenisCuti">Jenis Cuti Yang Diambil<span class="text-danger">*</span></label>
                 <select class="form-control" id="jenisCuti" v-model="cutiPegawai.jenisCuti" required>
                   <option value="" hidden selected>&lt;Pilih Jenis Cuti&gt;</option>
                   <option v-for="(cuti, index) in dataCuti.jenisCuti" :key="index" :value="index+1">{{ cuti }}</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="alasanCuti">Alasan Cuti</label>
+                <label for="alasanCuti">Alasan Cuti<span class="text-danger">*</span></label>
                 <textarea class="form-control" id="alasanCuti" rows="2" v-model="cutiPegawai.alasanCuti"></textarea>
               </div>
               <div class="form-group">
-                <label for="lamaCuti">Lama Cuti</label>
+                <label for="lamaCuti">Lama Cuti<span class="text-danger">*</span></label>
                 <div id="lamaCuti">
                   <Datepicker class="datepicker" :bootstrap-styling="true" :placeholder="'Tanggal awal'" :language="id" v-model="cutiPegawai.lamaCuti.tglAwal"></Datepicker>
                   <span>s/d</span>
@@ -110,32 +110,33 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="alamatCuti">Alamat Selama Menjalankan Cuti</label>
+                <label for="alamatCuti">Alamat Selama Menjalankan Cuti<span class="text-danger">*</span></label>
                 <textarea class="form-control" id="alamatCuti" rows="2" v-model="cutiPegawai.alamatCuti"></textarea>
               </div>
               <div class="form-group">
                 <vue-tel-input v-model="cutiPegawai.teleponCuti" :placeholder="'Nomor telepon yang dapat dihubungi selama cuti'"></vue-tel-input>
               </div>
               <div class="form-group">
-                <label for="atasanLangsung">Atasan Langsung</label>
+                <label for="atasanLangsung">Atasan Langsung<span class="text-danger">*</span></label>
                 <select class="form-control" id="atasanLangsung" v-model="cutiPegawai.atasanLangsung" required>
                   <option value="" hidden selected>&lt;Pilih Atasan&gt;</option>
                   <option v-for="(atasan, index) in atasanLangsung" :key="index" :value="atasan.id">{{ atasan.nama }} - {{ atasan.nama_jabatan }}</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="atasanLangsung">Pejabat Berwenang</label>
+                <label for="atasanLangsung">Pejabat Berwenang<span class="text-danger">*</span></label>
                 <select class="form-control" id="atasanLangsung" v-model="cutiPegawai.pejabatBerwenang" required>
                   <option value="" hidden selected>&lt;Pilih Pejabat&gt;</option>
                   <option v-for="(pejabat, index) in pejabatBerwenang" :key="index" :value="pejabat.id">{{ pejabat.nama }} - {{ pejabat.nama_jabatan }}</option>
                 </select>
               </div>
-              <div class="form-group" v-if="cutiPegawai.jenisCuti !== '' && cutiPegawai.jenisCuti !== 1">
+              <div class="form-group">
                 <label>Pilih Berkas Pendukung</label>
                 <div class="custom-file">
                   <input type="file" accept="application/pdf" class="custom-file-input" id="customFile" ref="berkasPendukung" @change="uploadBerkasPendukung()">
                   <label class="custom-file-label" for="customFile">{{ cutiPegawai.berkasPendukung.name === undefined ? cutiPegawai.berkasPendukung : cutiPegawai.berkasPendukung.name }}</label>
-                  <div class="invalid-feedback">* ukuran berkas maksimal 200KB</div>
+                  <div class="invalid-feedback"></div>
+                  <small class="form-text text-muted">* ukuran berkas maksimal 200KB</small>
                 </div>
               </div>
             </div>
