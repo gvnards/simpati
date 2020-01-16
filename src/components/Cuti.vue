@@ -38,7 +38,7 @@
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
             <td>{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
-            <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === '1' ? 'Terkirim':'Belum Terkirim' }}</td>
+            <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === 1 ? 'Terkirim':'Belum Terkirim' }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
               <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti'">Hapus</button>
@@ -74,6 +74,7 @@
 import ModalCuti from '@/components/modals/Cuti.vue'
 import allPegawai from '@/store/pegawai.json'
 import allPangkat from '@/store/pangkat.json'
+import bupati from '@/store/bupati.json'
 import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 
@@ -158,7 +159,7 @@ export default {
       return `${Math.floor(diffDays / 365)} Tahun ${Math.floor((diffDays % 365) / 30)} Bulan ${(diffDays % 365) % 30} Hari`
     },
     namaPegawai (item) {
-      return allPegawai.find(el => { return el.id === item.idPegawai }).nama
+      return allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
     },
     tambahCuti () {
       this.usulan.pengesahan = false
@@ -248,12 +249,10 @@ export default {
       }
       this.usulan.data = data
 
-      let pegawais = allPegawai.filter(el => { return el.id === data.idPegawai || el.id === data.idAtasan || el.id === data.idPejabat })
-      let pegawai = pegawais.find(el => { return el.id === data.idPegawai })
-      let atasan = pegawais.find(el => { return el.id === data.idAtasan })
-      let pejabat = pegawais.find(el => { return el.id === data.idPejabat })
-      console.log(data)
-      // console.log(pegawai)
+      let pegawais = allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
+      let pegawai = pegawais.find(el => { return parseInt(el.id) === data.idPegawai })
+      let atasan = data.idAtasan === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idAtasan })
+      let pejabat = data.idPejabat === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idPejabat })
       let tanggalSurat = new Date(data.createdAt)
       axios({
         // url: 'https://cuti.bkpsdmsitubondo.id/pdf/',
@@ -279,13 +278,14 @@ export default {
           nip_atasan: atasan.nip,
           nama_atasan: atasan.nama,
           jabatan_atasan: atasan.nama_jabatan,
-          pangkat_atasan: allPangkat[atasan.GOL_NAMA],
+          pangkat_atasan: data.idAtasan === 0 ? '' : allPangkat[atasan.GOL_NAMA],
           pengesahan_atasan: data.statusPengesahanAtasan,
           alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
           nip_pejabat: pejabat.nip,
           nama_pejabat: pejabat.nama,
           jabatan_pejabat: pejabat.nama_jabatan,
-          pangkat_pejabat: allPangkat[pejabat.GOL_NAMA],
+          pangkat_pejabat: data.idPejabat === 0 ? '' : allPangkat[pejabat.GOL_NAMA],
+          eselon_pejabat: parseInt(pejabat.eselon),
           pengesahan_pejabat: data.statusPengesahanPejabat,
           alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
         }

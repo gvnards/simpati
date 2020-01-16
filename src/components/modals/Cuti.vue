@@ -21,7 +21,7 @@
                   <div v-else v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
                 </div>
               </div>
-              <embed :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
+              <embed v-if="tambahCutiModal === 0" :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
             </div>
             <div v-else class="data-asn-wrapper">
               <div class="form-group">
@@ -241,6 +241,7 @@ export default {
       },
       dataStatusPengesahan: ['Disetujui', 'Perubahan', 'Ditangguhkan', 'Tidak Disetujui'],
       dataPengesahan: {
+        jenisCuti: '',
         status: '',
         lamaCuti: {
           tglAwal: '',
@@ -274,6 +275,7 @@ export default {
           berkasPendukung: this.data.berkas
         }
       } else if (this.pengesahan) {
+        this.dataPengesahan.jenisCuti = this.data.idCuti
         this.dataPengesahan.lamaCuti.tglAwal = new Date(this.data.tglAwal)
         this.dataPengesahan.lamaCuti.tglAkhir = new Date(this.data.tglAkhir)
         this.dataPengesahan.lamaCuti.totalHari = this.data.totalHari
@@ -281,18 +283,7 @@ export default {
     },
     'tabs.active' (val) {
       if (val === 'Berkas Pendukung') {
-        axios({
-          method: 'get',
-          // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
-          url: 'http://127.0.0.1/upload/berkas/cuti/',
-          responseType: 'blob',
-          params: {
-            data: this.data.berkas
-          }
-        }).then(res => {
-          let urls = window.URL.createObjectURL(res.data)
-          this.urlBerkasPendukung = urls
-        })
+        this.getBerkasPendukung()
       }
     }
   },
@@ -319,23 +310,116 @@ export default {
       let tempCountDay = 0
       for (let i = 0; i < diffDays; i++) {
         let date = this.pengesahan ? new Date(new Date(this.dataPengesahan.lamaCuti.tglAwal).getTime() + (i * 86400000)).getDay() : new Date(new Date(this.tglCuti.tglAwal).getTime() + (i * 86400000)).getDay()
-        if (date !== 0 && date !== 6) {
-          tempCountDay++
+        if (this.pengesahan) {
+          if (this.dataPengesahan.jenisCuti === 1) {
+            if (date !== 0 && date !== 6) {
+              tempCountDay++
+            }
+          } else {
+            tempCountDay++
+          }
+        } else {
+          if (this.cutiPegawai.jenisCuti === 1) {
+            if (date !== 0 && date !== 6) {
+              tempCountDay++
+            }
+          } else {
+            tempCountDay++
+          }
         }
       }
       return tempCountDay
     },
     atasanLangsung () {
-      if (this.dataPegawai.eselon !== '22') {
-        return this.dataAtasan.filter(el => { return el.eselon !== '21' })
+      switch (this.cutiPegawai.jenisCuti) {
+        case 2:
+          if (this.cutiPegawai.lamaCuti.totalHari > 1) {
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 30 })
+          }
+          break
       }
       return this.dataAtasan
     },
     pejabatBerwenang () {
-      if (this.dataPegawai.eselon !== '22' && this.dataPegawai.eselon !== '32' && this.dataPegawai.eselon !== '31') {
-        return this.dataAtasan.filter(el => { return el.eselon !== '21' })
+      if (this.cutiPegawai.jenisCuti === '' || this.cutiPegawai.lamaCuti.totalHari === 0) {
+        return []
       }
-      return this.dataAtasan
+      switch (this.cutiPegawai.jenisCuti) {
+        case 1: // CUTI TAHUNAN
+          if (parseInt(this.dataPegawai.eselon) < 30) { // PEJABAT ESELON 2
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 }) // Bupati
+          } else if (parseInt(this.dataPegawai.eselon) >= 30 && parseInt(this.dataPegawai.eselon) < 40) { // PEJABAT ESELON 3
+            if (this.dataPegawai.nama_jabatan.includes('Camat')) { // CAMAT
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 }) // Bupati
+            } else if (this.dataPegawai.nama_jabatan === 'Sekretaris Kecamatan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) === 21 }) // Sekretaris Daerah
+            }
+          } else if (parseInt(this.dataPegawai.eselon) >= 40 && parseInt(this.dataPegawai.eselon) < 50) { // PEJABAT ESELON 4
+            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.includes('Kecamatan')) { // KEPALA SEKSI KECAMATAN
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
+            } else if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
+            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
+              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+            }
+          } else { // PELAKSANA
+            if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
+            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
+              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+            }
+          }
+        case 2: // CUTI SAKIT
+          if (this.cutiPegawai.lamaCuti.totalHari > 1) {
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
+          } else {
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+          }
+        case 3: // CUTI KARENA ALASAN PENTING
+          return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
+        case 4: // CLTN
+          return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
+        case 5: // CUTI BESAR
+          return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
+        case 6:
+          if (parseInt(this.dataPegawai.eselon) < 30) { // PEJABAT ESELON 2
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 }) // Bupati
+          } else if (parseInt(this.dataPegawai.eselon) >= 30 && parseInt(this.dataPegawai.eselon) < 40) { // PEJABAT ESELON 3
+            if (this.dataPegawai.nama_jabatan.includes('Camat')) { // CAMAT
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 }) // Bupati
+            } else if (this.dataPegawai.nama_jabatan === 'Sekretaris Kecamatan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) === 21 }) // Sekretaris Daerah
+            }
+          } else if (parseInt(this.dataPegawai.eselon) >= 40 && parseInt(this.dataPegawai.eselon) < 50) { // PEJABAT ESELON 4
+            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.includes('Kecamatan')) { // KEPALA SEKSI KECAMATAN
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
+            } else if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
+            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
+              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+            }
+          } else { // PELAKSANA
+            if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
+            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
+              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else {
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+            }
+          }
+        default:
+          return []
+      }
     },
     tglCuti () {
       let year, month, day
@@ -368,6 +452,20 @@ export default {
     }
   },
   methods: {
+    getBerkasPendukung () {
+      axios({
+        method: 'get',
+        // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
+        url: 'http://127.0.0.1/upload/berkas/cuti/',
+        responseType: 'blob',
+        params: {
+          data: this.data.berkas
+        }
+      }).then(res => {
+        let urls = window.URL.createObjectURL(res.data)
+        this.urlBerkasPendukung = urls
+      })
+    },
     uploadBerkasPendukung () {
       console.log(this.$refs.berkasPendukung.files[0].size)
       if (this.$refs.berkasPendukung.files[0].size > 204800) {

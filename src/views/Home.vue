@@ -17,6 +17,7 @@
 import Login from '@/components/Login.vue'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import allPegawai from './../store/pegawai.json'
+import bupati from './../store/bupati.json'
 import axios from 'axios'
 
 export default {
@@ -50,28 +51,45 @@ export default {
           password: login.password
         }
       }).then(res => {
-        console.log(res)
         return res.data.loggedIn
       }).then(res => {
         if (res) {
-          let aPegawai = allPegawai.find(el => { return el.nip === login.username })
-          let atasan = []
-          atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
-          if (atasan[0].atasan !== null) {
-            do {
-              atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
-            } while (atasan[atasan.length - 1].atasan !== null)
-          }
-          atasan = atasan.filter(el => { return el.eselon !== '41' && el.eselon !== '42' })
-          this.$session.set('onLogin', login.username)
-          this.$router.push({
-            name: 'simpati',
-            params: {
-              userId: this.$session.get('onLogin'),
-              data: aPegawai,
-              atasan: atasan
+          if (login.username.includes('admin')) {
+            this.$session.set('onLogin', login.username)
+            this.$router.push({
+              name: 'admin-simpati',
+              params: {
+                userId: this.$session.get('onLogin')
+              }
+            })
+          } else {
+            let aPegawai = allPegawai.find(el => { return el.nip === login.username })
+            let atasan = []
+            atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+            if (atasan[0].atasan !== null) {
+              do {
+                atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
+              } while (atasan[atasan.length - 1].atasan !== null)
             }
-          })
+            atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
+            atasan.push(bupati)
+            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
+              atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' })[0])
+            }
+            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
+              atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' })[0])
+            }
+            console.log(atasan)
+            this.$session.set('onLogin', login.username)
+            this.$router.push({
+              name: 'simpati',
+              params: {
+                userId: this.$session.get('onLogin'),
+                data: aPegawai,
+                atasan: atasan
+              }
+            })
+          }
         } else {
           this.popup.onShow = !this.popup.onShow
         }
@@ -81,22 +99,40 @@ export default {
   },
   beforeCreate () {
     if (this.$session.get('session-id') !== undefined && this.$session.get('onLogin') !== undefined) {
-      let aPegawai = allPegawai.find(el => { return el.nip === this.$session.get('onLogin') })
-      let atasan = []
-      atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
-      do {
-        atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
-      } while (atasan[atasan.length - 1].atasan !== null)
-      atasan = atasan.filter(el => { return el.eselon !== '41' && el.eselon !== '42' })
-      if (aPegawai !== undefined) {
+      if (this.$session.get('onLogin').includes('admin')) {
         this.$router.push({
-          name: 'simpati',
+          name: 'admin-simpati',
           params: {
-            userId: this.$session.get('onLogin'),
-            data: aPegawai,
-            atasan: atasan
+            userId: this.$session.get('onLogin')
           }
         })
+      } else {
+        let aPegawai = allPegawai.find(el => { return el.nip === this.$session.get('onLogin') })
+        let atasan = []
+        atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+        if (atasan[0].atasan !== null) {
+          do {
+            atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
+          } while (atasan[atasan.length - 1].atasan !== null)
+        }
+        atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
+        atasan.push(bupati)
+        if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
+          atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' })[0])
+        }
+        if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
+          atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' })[0])
+        }
+        if (aPegawai !== undefined) {
+          this.$router.push({
+            name: 'simpati',
+            params: {
+              userId: this.$session.get('onLogin'),
+              data: aPegawai,
+              atasan: atasan
+            }
+          })
+        }
       }
     }
   },

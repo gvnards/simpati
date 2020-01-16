@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import PageNotFound from '@/views/PageNotFound.vue'
 import Home from '@/views/Home.vue'
 import Simpati from '@/views/Simpati.vue'
+import Admin from '@/views/Admin.vue'
 
 Vue.use(VueRouter)
 
@@ -20,6 +21,18 @@ const routes = [
     path: '/:userId/layanan-simpati',
     name: 'simpati',
     component: Simpati,
+    beforeEnter: (to, from, next) => {
+      if (from.name !== 'home') {
+        next('/')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: '/:userId/layanan-simpati',
+    name: 'admin-simpati',
+    component: Admin,
     beforeEnter: (to, from, next) => {
       if (from.name !== 'home') {
         next('/')
