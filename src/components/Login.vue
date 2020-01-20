@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-lg-6">
           <div class="content">
-            <img class="logo" src="../assets/logo-situbondo.png" alt="">
+            <img class="logo" src="https://cuti.bkpsdmsitubondo.id/img/logo-situbondo.png" alt="">
             <div class="logo-text">
               <p class="title">{{ $lang.aplikasi.title }}</p>
               <p class="sub-title">{{ $lang.aplikasi.subTitle }}</p>
@@ -60,7 +60,7 @@ export default {
 #home {
   position: relative;
   width: 100%;
-  background-image: url("../assets/bg-login.jpg");
+  background-image: url("https://cuti.bkpsdmsitubondo.id/img/bg-login.jpg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
