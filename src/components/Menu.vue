@@ -12,9 +12,11 @@
     </div>
     <div class="profile">
       <div class="profile-wrapper text-white">
-        <img :src="dataPegawai.JENIS_KELAMIN === 'M' ? require('./../assets/ico/private_account_male.svg') : require('./../assets/ico/private_account_female.svg')" alt="icon picture">
+        <img v-if="admin" src="./../assets/ico/user_shield.svg" alt="icon picture">
+        <img v-else :src="dataPegawai.JENIS_KELAMIN === 'M' ? require('./../assets/ico/private_account_male.svg') : require('./../assets/ico/private_account_female.svg')" alt="icon picture">
         <div class="text-wrapper">
-          <span class="name">{{ dataPegawai.nama | capitalizeName }}</span>
+          <span v-if="admin" class="name">Admin</span>
+          <span v-else class="name">{{ dataPegawai.nama | capitalizeName }}</span>
           <div class="status">
             <div class="circle"></div>
             <span class="status-text">Online</span>
@@ -43,7 +45,11 @@
 <script>
 export default {
   name: 'Menu',
-  props: ['dataPegawai', 'currMenu'],
+  props: {
+    dataPegawai: {},
+    currMenu: '',
+    admin: false
+  },
   data () {
     return {
       menu: {

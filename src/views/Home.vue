@@ -55,17 +55,39 @@ export default {
       }).then(res => {
         if (res) {
           if (login.username.includes('admin')) {
-            this.$session.set('onLogin', login.username)
-            this.$router.push({
-              name: 'admin-simpati',
+            axios({
+              method: 'get',
+              // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+              url: 'http://127.0.0.1/php_class/',
               params: {
-                userId: this.$session.get('onLogin')
+                onGet: 'GetDataAdmin',
+                nip: login.username
               }
+            }).then(res => {
+              this.$session.set('onLogin', login.username)
+              this.$router.push({
+                name: 'admin-simpati',
+                params: {
+                  userId: this.$session.get('onLogin'),
+                  data: res.data.dataAdmin
+                }
+              })
             })
           } else {
             let aPegawai = allPegawai.find(el => { return el.nip === login.username })
             let atasan = []
-            atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+            if (aPegawai.nama_opd.includes('Pendidikan') || aPegawai.nama_opd.includes('SMPN')) {
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan.includes('Kepala Dinas Pendidikan') }))
+            } else if (aPegawai.nama_opd.includes('UPTD Puskesmas')) {
+              let kepalaDinkes = allPegawai.find(el => { return el.nama_jabatan === 'Kepala Dinas Kesehatan' })
+              if (kepalaDinkes === undefined) {
+                atasan.push(allPegawai.find(el => { return parseInt(el.id) === parseInt(allPegawai.find(el => { return el.nama_jabatan === 'Kepala UPT Laboratorium Kesehatan' }).atasan) }))
+              } else {
+                atasan.push(kepalaDinkes)
+              }
+            } else {
+              atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+            }
             if (atasan[0].atasan !== null) {
               do {
                 atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
@@ -74,12 +96,11 @@ export default {
             atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
             atasan.push(bupati)
             if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
-              atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' })[0])
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }))
             }
             if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
-              atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' })[0])
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }))
             }
-            console.log(atasan)
             this.$session.set('onLogin', login.username)
             this.$router.push({
               name: 'simpati',
@@ -100,16 +121,31 @@ export default {
   beforeCreate () {
     if (this.$session.get('session-id') !== undefined && this.$session.get('onLogin') !== undefined) {
       if (this.$session.get('onLogin').includes('admin')) {
-        this.$router.push({
-          name: 'admin-simpati',
+        axios({
+          method: 'get',
+          // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+          url: 'http://127.0.0.1/php_class/',
           params: {
-            userId: this.$session.get('onLogin')
+            onGet: 'GetDataAdmin',
+            nip: this.$session.get('onLogin')
           }
+        }).then(res => {
+          this.$router.push({
+            name: 'admin-simpati',
+            params: {
+              userId: this.$session.get('onLogin'),
+              data: res.data.dataAdmin
+            }
+          })
         })
       } else {
         let aPegawai = allPegawai.find(el => { return el.nip === this.$session.get('onLogin') })
         let atasan = []
-        atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+        if (aPegawai.nama_opd.includes('Pendidikan')) {
+          atasan.push(allPegawai.find(el => { return el.nama_jabatan.includes('Kepala Dinas Pendidikan') }))
+        } else {
+          atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+        }
         if (atasan[0].atasan !== null) {
           do {
             atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
@@ -118,10 +154,10 @@ export default {
         atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
         atasan.push(bupati)
         if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
-          atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' })[0])
+          atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }))
         }
         if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
-          atasan.push(allPegawai.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' })[0])
+          atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }))
         }
         if (aPegawai !== undefined) {
           this.$router.push({

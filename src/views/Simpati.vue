@@ -54,7 +54,12 @@ export default {
   },
   methods: {
     changeCurrMenu (evMenu) {
-      this.currMenu = evMenu
+      if (evMenu.includes('Usulan')) {
+        this.currMenu = evMenu
+        this.currMenu.push('Cuti')
+      } else {
+        this.currMenu = evMenu
+      }
       if (this.currMenu.includes('Keluar')) {
         this.$session.clear()
         this.$session.destroy()

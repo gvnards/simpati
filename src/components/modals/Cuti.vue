@@ -357,29 +357,29 @@ export default {
               return this.dataAtasan.filter(el => { return parseInt(el.eselon) === 21 }) // Sekretaris Daerah
             }
           } else if (parseInt(this.dataPegawai.eselon) >= 40 && parseInt(this.dataPegawai.eselon) < 50) { // PEJABAT ESELON 4
-            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.includes('Kecamatan')) { // KEPALA SEKSI KECAMATAN
+            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan') { // KEPALA SEKSI KECAMATAN
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
             } else if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
-            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
-              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else if (this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan' || this.dataPegawai.nama_opd.split(' ')[0] === 'Kelurahan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan.includes('Camat') })
             } else {
               return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
             }
           } else { // PELAKSANA
             if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
-            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
-              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else if (this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan' || this.dataPegawai.nama_opd.split(' ')[0] === 'Kelurahan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan.includes('Camat') })
             } else {
-              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 30 && el.nama_jabatan.includes('Kepala') })
             }
           }
         case 2: // CUTI SAKIT
           if (this.cutiPegawai.lamaCuti.totalHari > 1) {
             return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
           } else {
-            return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+            return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 30 && el.nama_jabatan.includes('Kepala') })
           }
         case 3: // CUTI KARENA ALASAN PENTING
           return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 20 })
@@ -399,22 +399,22 @@ export default {
               return this.dataAtasan.filter(el => { return parseInt(el.eselon) === 21 }) // Sekretaris Daerah
             }
           } else if (parseInt(this.dataPegawai.eselon) >= 40 && parseInt(this.dataPegawai.eselon) < 50) { // PEJABAT ESELON 4
-            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.includes('Kecamatan')) { // KEPALA SEKSI KECAMATAN
+            if (this.dataPegawai.nama_jabatan.includes('Kepala Seksi') && this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan') { // KEPALA SEKSI KECAMATAN
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }) // Asisten Sekretaris Daerah yang Membidangi
             } else if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
-            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
-              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else if (this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan' || this.dataPegawai.nama_opd.split(' ')[0] === 'Kelurahan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan.includes('Camat') })
             } else {
               return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
             }
           } else { // PELAKSANA
             if (this.dataPegawai.nama_opd === 'Sekretariat Daerah') {
               return this.dataAtasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }) // Asisten Administrasi Umum
-            } else if (this.dataPegawai.nama_opd.includes('Kecamatan') || this.dataPegawai.nama_opd.includes('Kelurahan')) {
-              return this.dataAtasan.filter(el => { return this.dataAtasan.filter(el => el.nama_jabatan.includes('Camat')) })
+            } else if (this.dataPegawai.nama_opd.split(' ')[0] === 'Kecamatan' || this.dataPegawai.nama_opd.split(' ')[0] === 'Kelurahan') {
+              return this.dataAtasan.filter(el => { return el.nama_jabatan.includes('Camat') })
             } else {
-              return this.dataAtasan.filter(el => { return parseInt(el.eselon) >= 20 && parseInt(el.eselon) < 30 })
+              return this.dataAtasan.filter(el => { return parseInt(el.eselon) < 30 && el.nama_jabatan.includes('Kepala') })
             }
           }
         default:

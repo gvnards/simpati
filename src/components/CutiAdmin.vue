@@ -1,8 +1,7 @@
 <template>
   <div>
     <div class="header-wrapper">
-      <p>{{ currMenu[1] }} <span>Daftar {{ currMenu[1] }} Pribadi</span></p>
-      <button class="btn btn-sm btn-primary btn-add" @click="tambahCuti()" data-toggle="modal" data-target="#exampleModalScrollable"><img src="./../assets/ico/add.svg" alt="" srcset="">Tambah</button>
+      <p>{{ currMenu[1] }} <span>Daftar {{ currMenu[1] }}</span></p>
     </div>
     <div class="saring-wrapper">
       <p>Saring</p>
@@ -15,7 +14,7 @@
     </div>
     <div class="tab">
       <div class="tab-nav">
-        <div v-for="(nav, index) in tabs.nav" :key="index" :style="((dataPegawai.eselon === '' || dataPegawai.eselon.includes('4')) && nav === 'Pengesahan') ? 'cursor: not-allowed;':''" :class="nav===tabs.active ? 'active':''" @click="tabActive(nav)">{{ nav }}</div>
+        <div v-for="(nav, index) in tabs.nav" :key="index" class="active">{{ nav }}</div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -23,22 +22,20 @@
         <thead>
           <tr>
             <th scope="col" class="text-center">No</th>
-            <th scope="col" class="text-center" v-if="tabs.active!=='Usulan Cuti'">Nama Pegawai</th>
+            <th scope="col" class="text-center">Nama Pegawai</th>
             <th scope="col" class="text-center">Cuti</th>
             <th scope="col" class="text-center">Alasan</th>
             <th scope="col" class="text-center">Tanggal</th>
-            <th scope="col" class="text-center" v-if="tabs.active==='Usulan Cuti'">Status</th>
             <th scope="col" class="text-center">Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, index) in dataSurat" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
-            <td class="text-center" v-if="tabs.active!=='Usulan Cuti'">{{ namaPegawai(item) }}</td>
+            <td class="text-center">{{ namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
             <td>{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
-            <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === 1 ? 'Terkirim':'Belum Terkirim' }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
               <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti'">Hapus</button>
@@ -56,100 +53,75 @@
       </ul>
     </nav>
     <!-- end pagination -->
-    <ModalCuti :tambahCutiModal="tambahCutiModal" :dataPegawai="dataPegawai" :edit="usulan.edit" :pengesahan="usulan.pengesahan" :url="usulan.url" :data="usulan.data" @getSuratUsulan="getSuratUsulan" @getSuratPengesahan="getSuratPengesahan"></ModalCuti>
-    <PopupInfo :onShow="popup.onShow">
-      <template v-slot:title>
-        <span>Konfirmasi Data</span>
-      </template>
-      <p>Apakah Anda yakin untuk menghapus usulan ini ?</p>
-      <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-danger" @click="popup.onShow = !popup.onShow; deleteUsulan(delUsulan);" data-dismiss="modal">Hapus</button>
-      </template>
-    </PopupInfo>
+    <ModalCuti :tambahCutiModal="tambahCutiModal" :dataPegawai="dataPegawai" :edit="usulan.edit" :url="usulan.url" :data="usulan.data" @getSurat="getSurat"></ModalCuti>
   </div>
 </template>
 
 <script>
-import ModalCuti from '@/components/modals/Cuti.vue'
+import axios from 'axios'
 import allPegawai from '@/store/pegawai.json'
 import allPangkat from '@/store/pangkat.json'
 import bupati from '@/store/bupati.json'
-import axios from 'axios'
-import PopupInfo from '@/components/modals/PopupInfo.vue'
-
+import ModalCuti from '@/components/modals/CutiAdmin.vue'
 export default {
   components: {
-    ModalCuti,
-    PopupInfo
+    ModalCuti
   },
-  props: ['currMenu', 'dataPegawai'],
+  props: {
+    currMenu: '',
+    dataPegawai: {}
+  },
+  watch: {
+    'saring.tahun' (val) {
+      this.getSurat()
+      this.getCountSurat()
+    }
+  },
   data () {
     return {
+      tambahCutiModal: 0,
       saring: {
         tahun: ''
       },
-      tambahCutiModal: 0,
-      usulan: {
-        edit: false,
-        url: '',
-        data: {},
-        pengesahan: false
-      },
-      tabs: {
-        active: 'Usulan Cuti',
-        nav: ['Usulan Cuti', 'Pengesahan']
-      },
-      dataSurat: [],
-      popup: {
-        onShow: false
-      },
-      delUsulan: {},
       pagination: {
         current: 1,
         max: 1,
         fetch: 10 // maksimal get surat
-      }
-    }
-  },
-  watch: {
-    'tabs.active' (val) {
-      if (val === 'Usulan Cuti') {
-        this.pagination.current = 1
-        this.getSuratUsulan()
-        this.getCountSuratUsulan()
-      } else {
-        this.pagination.current = 1
-        this.getSuratPengesahan()
-        this.getCountSuratPengesahan()
-      }
-    },
-    'pagination.current' (val) {
-      if (this.tabs.active === 'Usulan Cuti') {
-        this.getSuratUsulan()
-        this.getCountSuratUsulan()
-      } else {
-        this.getSuratPengesahan()
-        this.getCountSuratPengesahan()
-      }
-    },
-    'saring.tahun' () {
-      if (this.tabs.active === 'Usulan Cuti') {
-        this.getSuratUsulan()
-        this.getCountSuratUsulan()
+      },
+      tabs: {
+        nav: ['Usulan']
+      },
+      dataSurat: [],
+      usulan: {
+        edit: false,
+        data: {},
+        url: ''
       }
     }
   },
   computed: {
-    listMonth () {
-      return ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'Nopember', 'Desember']
-    },
     listYear () {
       let now = new Date(Date.now()).getFullYear()
       return [now, now - 1, now - 2]
+    },
+    listMonth () {
+      return ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'Nopember', 'Desember']
     }
   },
   methods: {
+    getCountSurat () {
+      axios({
+        method: 'get',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id',
+        url: 'http://127.0.0.1/php_class/',
+        params: {
+          onGet: 'CountAllSurat',
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
+        }
+      }).then(res => {
+        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
+      })
+    },
     masaKerja (data) {
       let tmt = data.nip.slice(8, 14)
       tmt = new Date(`${tmt.slice(4)}/01/${tmt.slice(0, 4)}`)
@@ -158,94 +130,34 @@ export default {
       let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
       return `${Math.floor(diffDays / 365)} Tahun ${Math.floor((diffDays % 365) / 30)} Bulan ${(diffDays % 365) % 30} Hari`
     },
+    dateMonthToString (month) {
+      return this.listMonth[month]
+    },
     namaPegawai (item) {
       return allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
     },
-    tambahCuti () {
-      this.usulan.pengesahan = false
+    getSurat () {
+      axios({
+        method: 'get',
+        // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+        url: 'http://127.0.0.1/php_class/',
+        params: {
+          onGet: 'GetAllSurat',
+          current: (this.pagination.current - 1) * this.pagination.fetch,
+          fetch: this.pagination.fetch,
+          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
+        }
+      }).then(res => {
+        this.dataSurat = res.data.surat
+      })
+    },
+    onShowUsulan (data) {
       this.usulan.edit = false
       this.tambahCutiModal = 1
       setTimeout(() => {
         this.tambahCutiModal = 0
       }, 100)
-    },
-    tabActive (tab) {
-      if ((this.dataPegawai.eselon === '' || this.dataPegawai.eselon.includes('4')) && tab === 'Pengesahan') {
-        return
-      }
-      this.tabs.active = tab
-    },
-    getSuratUsulan () {
-      axios({
-        method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
-        params: {
-          onGet: 'GetSurat',
-          pegawai: this.dataPegawai.id,
-          current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.dataSurat = res.data.surat
-      })
-    },
-    getCountSuratUsulan () {
-      axios({
-        method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
-        params: {
-          onGet: 'CountSurat',
-          pegawai: this.dataPegawai.id,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
-      })
-    },
-    getSuratPengesahan () {
-      axios({
-        method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
-        params: {
-          onGet: 'GetSurat',
-          pegawai: this.dataPegawai.id,
-          pengesahan: true,
-          current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.dataSurat = res.data.surat
-      })
-    },
-    getCountSuratPengesahan () {
-      axios({
-        method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
-        params: {
-          onGet: 'CountSurat',
-          pegawai: this.dataPegawai.id,
-          pengesahan: true,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
-      })
-    },
-    onShowUsulan (data) {
-      this.tambahCuti()
-      if (this.tabs.active === 'Usulan Cuti') {
-        this.usulan.edit = true
-        this.usulan.pengesahan = false
-      } else {
-        this.usulan.edit = false
-        this.usulan.pengesahan = true
-      }
+      this.usulan.edit = true
       this.usulan.data = data
 
       let pegawais = allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
@@ -292,32 +204,11 @@ export default {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
       })
-    },
-    deleteUsulan (data) {
-      axios({
-        method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
-        data: {
-          onPost: 'DeleteUsulan',
-          id: data.id
-        }
-      }).then(() => {
-        this.getSuratUsulan()
-        this.getCountSuratUsulan()
-      })
-    },
-    dateDayToString (day) {
-      let listDay = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu']
-      return listDay[day]
-    },
-    dateMonthToString (month) {
-      return this.listMonth[month]
     }
   },
   created () {
-    this.getSuratUsulan()
-    this.getCountSuratUsulan()
+    this.getSurat()
+    this.getCountSurat()
   }
 }
 </script>
