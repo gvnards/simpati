@@ -59,10 +59,10 @@
 
 <script>
 import axios from 'axios'
-import allPegawai from '@/store/pegawai.json'
 import allPangkat from '@/store/pangkat.json'
 import bupati from '@/store/bupati.json'
 import ModalCuti from '@/components/modals/CutiAdmin.vue'
+import store from '../store'
 export default {
   components: {
     ModalCuti
@@ -79,6 +79,7 @@ export default {
   },
   data () {
     return {
+      allPegawai: [],
       tambahCutiModal: 0,
       saring: {
         tahun: ''
@@ -134,7 +135,7 @@ export default {
       return this.listMonth[month]
     },
     namaPegawai (item) {
-      return allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
+      return this.allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
     },
     getSurat () {
       axios({
@@ -160,7 +161,7 @@ export default {
       this.usulan.edit = true
       this.usulan.data = data
 
-      let pegawais = allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
+      let pegawais = this.allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
       let pegawai = pegawais.find(el => { return parseInt(el.id) === data.idPegawai })
       let atasan = data.idAtasan === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idAtasan })
       let pejabat = data.idPejabat === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idPejabat })
@@ -208,6 +209,7 @@ export default {
     }
   },
   created () {
+    this.allPegawai = store.state.pegawai
     this.getSurat()
     this.getCountSurat()
   }

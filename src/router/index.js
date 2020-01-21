@@ -6,6 +6,10 @@ import Home from '@/views/Home.vue'
 import Simpati from '@/views/Simpati.vue'
 import Admin from '@/views/Admin.vue'
 
+import axios from 'axios'
+import bupati from './../store/bupati.json'
+import store from '../store/index.js'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -14,7 +18,81 @@ const routes = [
     name: 'home',
     component: Home,
     beforeEnter: (to, from, next) => {
-      next()
+      if (router.app.$session.get('session-id') !== undefined && router.app.$session.get('onLogin') !== undefined) {
+        if (router.app.$session.get('onLogin').includes('admin')) {
+          axios({
+            method: 'get',
+            // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+            url: 'http://127.0.0.1/php_class/',
+            params: {
+              onGet: 'GetDataAdmin',
+              nip: router.app.$session.get('onLogin')
+            }
+          }).then(res => {
+            router.push({
+              name: 'admin-simpati',
+              params: {
+                userId: router.app.$session.get('onLogin'),
+                data: res.data.dataAdmin
+              }
+            })
+          })
+        } else {
+          axios({
+            method: 'get',
+            // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+            url: 'http://127.0.0.1/php_class/',
+            params: {
+              onGet: 'AllPegawai'
+            }
+          }).then(res => {
+            let allPegawai = res.data
+            store.commit('SET_PEGAWAI', res.data)
+            let aPegawai = allPegawai.find(el => { return el.nip === router.app.$session.get('onLogin') })
+            let atasan = []
+            if (aPegawai.nama_opd.includes('Pendidikan')) {
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan.includes('Kepala Dinas Pendidikan') }))
+            } else {
+              atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
+            }
+            if (atasan[0].atasan !== null) {
+              do {
+                atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
+              } while (atasan[atasan.length - 1].atasan !== null)
+            }
+            atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
+            atasan.push(bupati)
+            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }))
+            }
+            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
+              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }))
+            }
+            if (aPegawai !== undefined) {
+              router.push({
+                name: 'simpati',
+                params: {
+                  userId: router.app.$session.get('onLogin'),
+                  data: aPegawai,
+                  atasan: atasan
+                }
+              })
+            }
+          })
+        }
+      } else {
+        axios({
+          method: 'get',
+          // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+          url: 'http://127.0.0.1/php_class/',
+          params: {
+            onGet: 'AllPegawai'
+          }
+        }).then(res => {
+          store.commit('SET_PEGAWAI', res.data)
+          next()
+        })
+      }
     }
   },
   {
