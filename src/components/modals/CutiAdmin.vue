@@ -78,7 +78,7 @@ export default {
     PopupInfo
   },
   props: {
-    tambahCutiModal: '',
+    tambahCutiModal: 0,
     url: '',
     edit: '',
     data: {}
@@ -107,6 +107,7 @@ export default {
           berkasPendukung: this.data.berkas
         }
       }
+      this.tabs.active = 'Surat Usulan'
     }
   },
   data () {
@@ -200,17 +201,29 @@ export default {
       $('#exampleModalScrollable').modal('hide')
     },
     getBerkasPendukung () {
+      this.urlBerkasPendukung = ''
+      // this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+      // axios({
+      //   method: 'get',
+      //   // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
+      //   url: 'http://127.0.0.1/upload/berkas/cuti/',
+      //   responseType: 'blob',
+      //   params: {
+      //     data: this.data.berkas
+      //   }
+      // }).then(res => {
+      //   let urls = window.URL.createObjectURL(res.data)
+      //   this.urlBerkasPendukung = urls
+      // })
       axios({
         method: 'get',
-        // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
-        url: 'http://127.0.0.1/upload/berkas/cuti/',
-        responseType: 'blob',
-        params: {
-          data: this.data.berkas
-        }
+        // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
+        url: 'http://127.0.0.1/upload/berkas/cuti/'
       }).then(res => {
-        let urls = window.URL.createObjectURL(res.data)
-        this.urlBerkasPendukung = urls
+        if (res.data.cb) {
+          // this.urlBerkasPendukung = `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+          this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+        }
       })
     },
     handleResize () {

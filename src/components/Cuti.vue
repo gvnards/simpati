@@ -253,6 +253,7 @@ export default {
       let atasan = data.idAtasan === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idAtasan })
       let pejabat = data.idPejabat === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idPejabat })
       let tanggalSurat = new Date(data.createdAt)
+      this.usulan.url = ''
       axios({
         // url: 'https://cuti.bkpsdmsitubondo.id/pdf/',
         url: 'http://127.0.0.1/fpdf/',

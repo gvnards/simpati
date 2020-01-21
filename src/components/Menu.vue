@@ -2,6 +2,7 @@
   <div id="menu-wrapper">
     <div class="logo">
       <div class="logo-wrapper">
+        <a class="ahreflogo" href="https://cuti.bkpsdmsitubondo.id"></a>
         <img src="./../assets/ico/create.svg" alt="" srcset="">
         <p class="text-wrapper">
           <span class="text-layanan">Layanan</span>
@@ -31,6 +32,7 @@
       <div class="menu-item text-white" v-for="(mainMenu, iMainMenu) in menu.main.text" :key="iMainMenu" >
         <div class="main-menu" :class="currMenu.includes(mainMenu) ? 'active' : ''" @click="changeCurrMenu(mainMenu, 'main')">
           <img :src="require(`./../assets/ico/${menu.main.icon[iMainMenu]}`)" alt=""><span>{{ mainMenu }}</span>
+          <a class="ahref" href="https://cuti.bkpsdmsitubondo.id" v-if="mainMenu === 'Keluar'"></a>
         </div>
         <div v-if="currMenu.includes(mainMenu)">
           <div class="sub-menu" :class="currMenu.includes(subMenu) ? 'active' : ''" v-for="(subMenu, iSubMenu) in menu.sub[iMainMenu]" :key="iSubMenu" @click="changeCurrMenu(subMenu, 'sub')">
@@ -181,6 +183,7 @@ export default {
     .menu-item {
       padding-left: 10px;
       .main-menu {
+        position: relative;
         cursor: pointer;
         height: 40px;
         border-left: 4px solid transparent;
@@ -230,5 +233,16 @@ export default {
       }
     }
   }
+}
+.ahref {
+  &logo {
+    width: 100%;
+    height: calc(100% - 8px);
+    position: absolute;
+  }
+  right: 0px;
+  width: calc(100% + 14px);
+  height: 100%;
+  position: absolute;
 }
 </style>
