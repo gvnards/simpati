@@ -10,8 +10,6 @@ import Lang from 'vue-lang'
 
 import VueSession from 'vue-session'
 
-import VueTelInput from 'vue-tel-input'
-
 Vue.use(Lang, {
   lang: 'id',
   locales: {
@@ -22,7 +20,6 @@ Vue.use(Lang, {
 Vue.use(VueSession, {
   persist: true
 })
-Vue.use(VueTelInput)
 
 Vue.config.productionTip = false
 

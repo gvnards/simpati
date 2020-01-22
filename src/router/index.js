@@ -46,6 +46,7 @@ const routes = [
               onGet: 'AllPegawai'
             }
           }).then(res => {
+            next()
             let allPegawai = res.data
             store.commit('SET_PEGAWAI', res.data)
             let aPegawai = allPegawai.find(el => { return el.nip === router.app.$session.get('onLogin') })
@@ -81,17 +82,7 @@ const routes = [
           })
         }
       } else {
-        axios({
-          method: 'get',
-          // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-          url: 'http://127.0.0.1/php_class/',
-          params: {
-            onGet: 'AllPegawai'
-          }
-        }).then(res => {
-          store.commit('SET_PEGAWAI', res.data)
-          next()
-        })
+        next()
       }
     }
   },

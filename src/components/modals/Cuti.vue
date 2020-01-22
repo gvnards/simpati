@@ -114,7 +114,8 @@
                 <textarea class="form-control" id="alamatCuti" rows="2" v-model="cutiPegawai.alamatCuti"></textarea>
               </div>
               <div class="form-group">
-                <vue-tel-input v-model="cutiPegawai.teleponCuti" :placeholder="'Nomor telepon yang dapat dihubungi selama cuti'"></vue-tel-input>
+                <label for="nomorTelepon">Nomor Telepon yang Dapat Dihubungi Selama Cuti<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nomorTelepon" v-model="cutiPegawai.teleponCuti">
               </div>
               <div class="form-group">
                 <label for="atasanLangsung">Atasan Langsung<span class="text-danger">*</span></label>
@@ -253,6 +254,27 @@ export default {
     }
   },
   watch: {
+    'cutiPegawai.teleponCuti' (val) {
+      let notelNormal = val.split('-').join('')
+      if (isNaN(notelNormal)) {
+        if (notelNormal.length > 1) {
+          this.cutiPegawai.teleponCuti = notelNormal.slice(0, notelNormal.length - 1)
+        } else {
+          this.cutiPegawai.teleponCuti = ''
+        }
+      }
+      if (notelNormal.length >= 10 && !this.edit) {
+        let notel = ''
+        for (let i = 0; i < Math.ceil(notelNormal.length / 3); i++) {
+          notel += notelNormal.slice(i * 3, (i * 3) + 3)
+          notel += '-'
+        }
+        if (notel[notel.length - 1] === '-') {
+          notel = notel.slice(0, notel.length - 1)
+        }
+        this.cutiPegawai.teleponCuti = notel
+      }
+    },
     hariCuti (val) {
       this.cutiPegawai.lamaCuti.totalHari = val
       this.dataPengesahan.lamaCuti.totalHari = val
