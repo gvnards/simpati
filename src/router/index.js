@@ -29,12 +29,23 @@ const routes = [
               nip: router.app.$session.get('onLogin')
             }
           }).then(res => {
-            router.push({
-              name: 'admin-simpati',
+            axios({
+              method: 'get',
+              // url: 'https://server.cuti.bkpsdmsitubondo.id/',
+              url: 'http://127.0.0.1/php_class/',
               params: {
-                userId: router.app.$session.get('onLogin'),
-                data: res.data.dataAdmin
+                onGet: 'AllPegawai'
               }
+            }).then(ress => {
+              store.commit('SET_PEGAWAI', ress.data)
+              next()
+              router.push({
+                name: 'admin-simpati',
+                params: {
+                  userId: router.app.$session.get('onLogin'),
+                  data: res.data.dataAdmin
+                }
+              })
             })
           })
         } else {
