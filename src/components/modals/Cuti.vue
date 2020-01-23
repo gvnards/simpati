@@ -184,6 +184,7 @@ import { id } from 'vuejs-datepicker/dist/locale'
 import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import $ from 'jquery'
+import store from '../../store'
 
 export default {
   components: {
@@ -469,39 +470,31 @@ export default {
       }
     },
     isFormFullFilled () {
-      if (this.cutiPegawai.jenisCuti !== '' && this.cutiPegawai.alasanCuti !== '' && this.cutiPegawai.lamaCuti.tglAwal !== '' && this.cutiPegawai.lamaCuti.tglAkhir !== '' && this.cutiPegawai.lamaCuti.totalHari !== 0 && this.cutiPegawai.alamatCuti !== '' && this.cutiPegawai.teleponCuti !== '' && this.cutiPegawai.atasanLangsung !== '' && this.cutiPegawai.pejabatBerwenang !== '') return true
+      if (this.cutiPegawai.jenisCuti !== '' && this.cutiPegawai.alasanCuti !== '' && this.cutiPegawai.lamaCuti.tglAwal !== '' && this.cutiPegawai.lamaCuti.tglAkhir !== '' && this.cutiPegawai.lamaCuti.totalHari !== 0 && this.cutiPegawai.alamatCuti !== '' && this.cutiPegawai.teleponCuti !== '' && this.cutiPegawai.atasanLangsung !== '' && this.cutiPegawai.pejabatBerwenang !== '') {
+        if (this.cutiPegawai.jenisCuti !== 1) {
+          if (this.cutiPegawai.berkasPendukung !== '') {
+            return true
+          }
+        } else {
+          return true
+        }
+      }
       return false
     }
   },
   methods: {
     getBerkasPendukung () {
       this.urlBerkasPendukung = ''
-      // this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
-      // axios({
-      //   method: 'get',
-      //   // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
-      //   url: 'http://127.0.0.1/upload/berkas/cuti/',
-      //   responseType: 'blob',
-      //   params: {
-      //     data: this.data.berkas
-      //   }
-      // }).then(res => {
-      //   let urls = window.URL.createObjectURL(res.data)
-      //   this.urlBerkasPendukung = urls
-      // })
       axios({
         method: 'get',
-        // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
-        url: 'http://127.0.0.1/upload/berkas/cuti/'
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/upload/berkas/cuti/' : 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
       }).then(res => {
         if (res.data.cb) {
-          // this.urlBerkasPendukung = `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
-          this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+          this.urlBerkasPendukung = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}` : `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
         }
       })
     },
     uploadBerkasPendukung () {
-      console.log(this.$refs.berkasPendukung.files[0].size)
       if (this.$refs.berkasPendukung.files[0].size > 204800) {
         alert('File terlalu besar')
         return
@@ -543,8 +536,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'InsertSurat',
           pegawai: parseInt(this.dataPegawai.id),
@@ -559,11 +551,8 @@ export default {
           pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
         }
       }).then((res) => {
-        // console.log(res)
         this.uploadBerkas()
-        // console.log('SUKSES')
       }).catch(() => {
-        // console.log('GAGAL')
       })
       this.popup.onShow = !this.popup.onShow
       $('#exampleModalScrollable').modal('hide')
@@ -576,14 +565,12 @@ export default {
       formData.append('pegawai', parseInt(this.dataPegawai.id))
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(res => {
-        console.log(res)
         this.$emit('getSuratUsulan')
       })
     },
@@ -597,8 +584,7 @@ export default {
         }
         axios({
           method: 'post',
-          // url: 'https://server.cuti.bkpsdmsitubondo.id',
-          url: 'http://127.0.0.1/php_class/',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -608,8 +594,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateSurat',
           id: this.data.id,
@@ -625,9 +610,7 @@ export default {
         }
       }).then((res) => {
         this.$emit('getSuratUsulan')
-        // console.log('SUKSES')
       }).catch(() => {
-        // console.log('GAGAL')
       })
       this.popup.onShow = !this.popup.onShow
       $('#exampleModalScrollable').modal('hide')
@@ -635,8 +618,7 @@ export default {
     kirim () {
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetKirimCuti',
           id: this.data.id
@@ -657,8 +639,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetPengesahan',
           id: this.data.id,
@@ -670,7 +651,6 @@ export default {
           totalHari: this.dataPengesahan.lamaCuti.totalHari
         }
       }).then((res) => {
-        console.log(res)
         this.$emit('getSuratPengesahan')
       })
     }

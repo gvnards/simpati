@@ -113,8 +113,7 @@ export default {
     getCountSurat () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'CountAllSurat',
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
@@ -140,8 +139,7 @@ export default {
     getSurat () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetAllSurat',
           current: (this.pagination.current - 1) * this.pagination.fetch,
@@ -168,8 +166,7 @@ export default {
       let tanggalSurat = new Date(data.createdAt)
       this.usulan.url = ''
       axios({
-        // url: 'https://cuti.bkpsdmsitubondo.id/pdf/',
-        url: 'http://127.0.0.1/fpdf/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
         method: 'get',
         responseType: 'blob',
         params: {

@@ -179,8 +179,7 @@ export default {
     getSuratUsulan () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
@@ -195,8 +194,7 @@ export default {
     getCountSuratUsulan () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'CountSurat',
           pegawai: this.dataPegawai.id,
@@ -209,8 +207,7 @@ export default {
     getSuratPengesahan () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
@@ -226,8 +223,7 @@ export default {
     getCountSuratPengesahan () {
       axios({
         method: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'CountSurat',
           pegawai: this.dataPegawai.id,
@@ -256,8 +252,7 @@ export default {
       let tanggalSurat = new Date(data.createdAt)
       this.usulan.url = ''
       axios({
-        // url: 'https://cuti.bkpsdmsitubondo.id/pdf/',
-        url: 'http://127.0.0.1/fpdf/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
         method: 'get',
         responseType: 'blob',
         params: {
@@ -298,8 +293,7 @@ export default {
     deleteUsulan (data) {
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'DeleteUsulan',
           id: data.id

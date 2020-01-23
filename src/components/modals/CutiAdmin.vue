@@ -72,6 +72,7 @@
 import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import $ from 'jquery'
+import store from '../../store'
 
 export default {
   components: {
@@ -177,8 +178,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateSurat',
           id: this.data.id,
@@ -202,27 +202,12 @@ export default {
     },
     getBerkasPendukung () {
       this.urlBerkasPendukung = ''
-      // this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
-      // axios({
-      //   method: 'get',
-      //   // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/',
-      //   url: 'http://127.0.0.1/upload/berkas/cuti/',
-      //   responseType: 'blob',
-      //   params: {
-      //     data: this.data.berkas
-      //   }
-      // }).then(res => {
-      //   let urls = window.URL.createObjectURL(res.data)
-      //   this.urlBerkasPendukung = urls
-      // })
       axios({
         method: 'get',
-        // url: 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
-        url: 'http://127.0.0.1/upload/berkas/cuti/'
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/upload/berkas/cuti/' : 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
       }).then(res => {
         if (res.data.cb) {
-          // this.urlBerkasPendukung = `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
-          this.urlBerkasPendukung = `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+          this.urlBerkasPendukung = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}` : `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
         }
       })
     },

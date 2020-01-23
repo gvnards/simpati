@@ -22,8 +22,7 @@ const routes = [
         if (router.app.$session.get('onLogin').includes('admin')) {
           axios({
             method: 'get',
-            // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-            url: 'http://127.0.0.1/php_class/',
+            url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
             params: {
               onGet: 'GetDataAdmin',
               nip: router.app.$session.get('onLogin')
@@ -31,8 +30,7 @@ const routes = [
           }).then(res => {
             axios({
               method: 'get',
-              // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-              url: 'http://127.0.0.1/php_class/',
+              url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
                 onGet: 'AllPegawai'
               }
@@ -51,8 +49,7 @@ const routes = [
         } else {
           axios({
             method: 'get',
-            // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-            url: 'http://127.0.0.1/php_class/',
+            url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
             params: {
               onGet: 'AllPegawai'
             }

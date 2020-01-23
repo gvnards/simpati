@@ -6,9 +6,10 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     lang: 'id',
-    pegawai: ['asd'],
+    pegawai: [],
     jabatan: [],
-    opd: []
+    opd: [],
+    build: 'dev'
   },
   mutations: {
     CHANGE_LANG (state, lang) {

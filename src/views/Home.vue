@@ -44,8 +44,7 @@ export default {
       this.button.masuk.disable = true
       axios({
         methods: 'get',
-        // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-        url: 'http://127.0.0.1/php_class/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'UserLogin',
           nip: login.username,
@@ -58,8 +57,7 @@ export default {
           if (login.username.includes('admin')) {
             axios({
               method: 'get',
-              // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-              url: 'http://127.0.0.1/php_class/',
+              url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
                 onGet: 'GetDataAdmin',
                 nip: login.username
@@ -77,8 +75,7 @@ export default {
           } else {
             axios({
               method: 'get',
-              // url: 'https://server.cuti.bkpsdmsitubondo.id/',
-              url: 'http://127.0.0.1/php_class/',
+              url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
                 onGet: 'AllPegawai'
               }
