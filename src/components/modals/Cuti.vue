@@ -91,7 +91,7 @@
                 <label for="jenisCuti">Jenis Cuti Yang Diambil<span class="text-danger">*</span></label>
                 <select class="form-control" id="jenisCuti" v-model="cutiPegawai.jenisCuti" required>
                   <option value="" hidden selected>&lt;Pilih Jenis Cuti&gt;</option>
-                  <option v-for="(cuti, index) in dataCuti.jenisCuti" :key="index" :value="index+1">{{ cuti }}</option>
+                  <option v-for="(cuti, index) in dataCuti.jenisCuti" :key="index" :value="index+1" :hidden="index === 0 && $store.state.totalCutiTahunan === 0">{{ cuti }}</option>
                 </select>
               </div>
               <div class="form-group">
@@ -165,7 +165,10 @@
         <span v-else>Terjadi Kesalahan</span>
       </template>
       <p v-if="popup.isSuccess">Apakah data Anda sudah benar dan yakin untuk melanjutkan ?</p>
-      <p v-else>Lengkapi data Anda terlebih dahulu !</p>
+      <p v-else>
+        <span v-if="popup.overDay">Total cuti yang diambil melebihi sisa cuti sebanyak {{ $store.state.totalCutiTahunan }} hari !</span>
+        <span v-else>Lengkapi data Anda terlebih dahulu !</span>
+      </p>
       <template v-slot:footer>
         <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
         <div v-if="popup.isSuccess">
@@ -239,7 +242,8 @@ export default {
       },
       popup: {
         onShow: false,
-        isSuccess: false
+        isSuccess: false,
+        overDay: false
       },
       dataStatusPengesahan: ['Disetujui', 'Perubahan', 'Ditangguhkan', 'Tidak Disetujui'],
       dataPengesahan: {
@@ -348,6 +352,19 @@ export default {
             }
           } else {
             tempCountDay++
+          }
+        }
+      }
+      if (!this.pengesahan) {
+        if (this.cutiPegawai.jenisCuti === 1) {
+          if (store.state.totalCutiTahunan < tempCountDay) {
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+            this.popup.onShow = true
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+            this.popup.overDay = true
+          } else {
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+            this.popup.overDay = true
           }
         }
       }
@@ -551,7 +568,9 @@ export default {
           pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
         }
       }).then((res) => {
-        this.uploadBerkas()
+        return this.uploadBerkas()
+      }).then(res => {
+        this.$emit('getSuratUsulan')
       }).catch(() => {
       })
       this.popup.onShow = !this.popup.onShow
@@ -563,15 +582,36 @@ export default {
       formData.append('onPost', 'InsertBerkas')
       formData.append('jenisCuti', this.cutiPegawai.jenisCuti)
       formData.append('pegawai', parseInt(this.dataPegawai.id))
-      axios({
+      return axios({
         method: 'post',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then(res => {
-        this.$emit('getSuratUsulan')
+      })
+    },
+    decreaseJumlahCutiTahunan () {
+      return axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'DecreaseJumlahCutiTahunan',
+          jumlahCutiDiambil: this.data.totalHari,
+          idPegawai: parseInt(this.data.idPegawai)
+        }
+      })
+    },
+    updateJumlahCuti (jumlah) {
+      return axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'UpdateJumlah',
+          jumlah: jumlah,
+          idPegawai: parseInt(this.data.idPegawai),
+          tahun: this.data.tglAwal.split('-')[0]
+        }
       })
     },
     updateCuti () {
@@ -651,6 +691,12 @@ export default {
           totalHari: this.dataPengesahan.lamaCuti.totalHari
         }
       }).then((res) => {
+        if (this.data.idCuti === 1 && (this.dataPengesahan.status === 1 || this.dataPengesahan.status === 2)) {
+          return this.decreaseJumlahCutiTahunan()
+        } else if (this.data.idCuti === 5 && (this.dataPengesahan.status === 1 || this.dataPengesahan.status === 2)) {
+          return this.updateJumlahCuti(0)
+        }
+      }).then(res => {
         this.$emit('getSuratPengesahan')
       })
     }

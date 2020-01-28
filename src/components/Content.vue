@@ -2,7 +2,7 @@
   <div id="content">
     <Header :dataPegawai="dataPegawai" :currMenu="currMenu"></Header>
     <div class="fill-content">
-      <Dashboard v-if="currMenu.includes('Dasbor')"></Dashboard>
+      <Dashboard :dataPegawai="dataPegawai" v-if="currMenu.includes('Dasbor')"></Dashboard>
       <!-- Usulan -->
       <Cuti :currMenu="currMenu" :dataPegawai="dataPegawai" v-else-if="currMenu.includes('Cuti')"></Cuti>
     </div>

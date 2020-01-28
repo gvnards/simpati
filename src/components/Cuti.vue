@@ -26,7 +26,7 @@
             <th scope="col" class="text-center" v-if="tabs.active!=='Usulan Cuti'">Nama Pegawai</th>
             <th scope="col" class="text-center">Cuti</th>
             <th scope="col" class="text-center">Alasan</th>
-            <th scope="col" class="text-center">Tanggal</th>
+            <th scope="col" class="text-center">Tanggal Cuti</th>
             <th scope="col" class="text-center" v-if="tabs.active==='Usulan Cuti'">Status</th>
             <th scope="col" class="text-center">Aksi</th>
           </tr>
@@ -36,12 +36,12 @@
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
             <td class="text-center" v-if="tabs.active!=='Usulan Cuti'">{{ namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
-            <td>{{ item.alasan }}</td>
+            <td style="max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
             <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === 1 ? 'Terkirim':'Belum Terkirim' }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
-              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti'">Hapus</button>
+              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti' && item.kirimSurat !== 1">Hapus</button>
             </td>
           </tr>
         </tbody>
@@ -110,34 +110,50 @@ export default {
         current: 1,
         max: 1,
         fetch: 10 // maksimal get surat
+      },
+      sort: {
+        by: 'jenisCuti',
+        dir: true // true = ASC, false = DESC
       }
     }
   },
   watch: {
+    'sort': {
+      handler (val) {
+        console.log(val)
+        // sort((a, b) => {
+        //   switch (this.sort.by) {
+        //     case 'jenisCuti':
+        //       if (this.sort.dir === true) {
+        //         return ((a.jenis === b.jenis) ? 0 : ((a.jenis > b.jenis) ? 1 : -1))
+        //       } else {
+        //         return ((a.jenis === b.jenis) ? 0 : ((a.jenis < b.jenis) ? 1 : -1))
+        //       }
+        //       break
+        //   }
+        // })
+      },
+      deep: true
+    },
     'tabs.active' (val) {
       if (val === 'Usulan Cuti') {
         this.pagination.current = 1
         this.getSuratUsulan()
-        this.getCountSuratUsulan()
       } else {
         this.pagination.current = 1
         this.getSuratPengesahan()
-        this.getCountSuratPengesahan()
       }
     },
     'pagination.current' (val) {
       if (this.tabs.active === 'Usulan Cuti') {
-        this.getSuratUsulan()
-        this.getCountSuratUsulan()
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
       } else {
-        this.getSuratPengesahan()
-        this.getCountSuratPengesahan()
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
       }
     },
     'saring.tahun' () {
       if (this.tabs.active === 'Usulan Cuti') {
         this.getSuratUsulan()
-        this.getCountSuratUsulan()
       }
     }
   },
@@ -151,6 +167,18 @@ export default {
     }
   },
   methods: {
+    getJumlahCuti () {
+      axios({
+        method: 'get',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        params: {
+          onGet: 'GetJumlahCuti',
+          idPegawai: this.dataPegawai.id
+        }
+      }).then(res => {
+        store.commit('SET_TOTAL_CUTI_TAHUNAN', res.data.totalCuti)
+      })
+    },
     masaKerja (data) {
       let tmt = data.nip.slice(8, 14)
       tmt = new Date(`${tmt.slice(4)}/01/${tmt.slice(0, 4)}`)
@@ -163,6 +191,7 @@ export default {
       return this.allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
     },
     tambahCuti () {
+      this.getJumlahCuti()
       this.usulan.pengesahan = false
       this.usulan.edit = false
       this.tambahCutiModal = 1
@@ -183,25 +212,14 @@ export default {
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
-          current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch,
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
-        this.dataSurat = res.data.surat
-      })
-    },
-    getCountSuratUsulan () {
-      axios({
-        method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
-        params: {
-          onGet: 'CountSurat',
-          pegawai: this.dataPegawai.id,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
+        store.commit('SET_DATASURAT', res.data.surat)
+
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+
+        this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
       })
     },
     getSuratPengesahan () {
@@ -212,26 +230,14 @@ export default {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.id,
           pengesahan: true,
-          current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch,
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
-        this.dataSurat = res.data.surat
-      })
-    },
-    getCountSuratPengesahan () {
-      axios({
-        method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
-        params: {
-          onGet: 'CountSurat',
-          pegawai: this.dataPegawai.id,
-          pengesahan: true,
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
+        store.commit('SET_DATASURAT', res.data.surat)
+
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+
+        this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
       })
     },
     onShowUsulan (data) {
@@ -300,7 +306,6 @@ export default {
         }
       }).then(() => {
         this.getSuratUsulan()
-        this.getCountSuratUsulan()
       })
     },
     dateDayToString (day) {
@@ -314,7 +319,6 @@ export default {
   created () {
     this.allPegawai = store.state.pegawai
     this.getSuratUsulan()
-    this.getCountSuratUsulan()
   }
 }
 </script>

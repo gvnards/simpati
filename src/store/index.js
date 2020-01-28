@@ -9,6 +9,8 @@ export default new Vuex.Store({
     pegawai: [],
     jabatan: [],
     opd: [],
+    dataSurat: [],
+    totalCutiTahunan: -1,
     build: 'dev'
   },
   mutations: {
@@ -23,6 +25,12 @@ export default new Vuex.Store({
     },
     SET_OPD (state, json) {
       state.opd = json
+    },
+    SET_DATASURAT (state, arr) {
+      state.dataSurat = arr
+    },
+    SET_TOTAL_CUTI_TAHUNAN (state, total) {
+      state.totalCutiTahunan = total
     }
   },
   actions: {

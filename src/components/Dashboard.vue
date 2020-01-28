@@ -11,7 +11,7 @@
               <p class="text-center">
                 <span>maksimal</span>
                 <br>
-                <span :style="`color: ${cuti.color[index]}`">{{ cuti.sisa[index] }}</span>
+                <span :style="`color: ${cuti.color[index]}`">{{ jenis.toUpperCase() === 'TAHUNAN' ? totalCutiTahunan : cuti.sisa[index] }}</span>
                 <br>
                 <span>hari</span>
               </p>
@@ -28,9 +28,15 @@
 </template>
 
 <script>
+import axios from 'axios'
+import store from '@/store'
 export default {
+  props: {
+    dataPegawai: {}
+  },
   data () {
     return {
+      totalCutiTahunan: 0,
       cuti: {
         jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
         sisa: [12, '-', 30, '-', '-', '-'],
@@ -42,6 +48,24 @@ export default {
     currentYear () {
       return new Date(Date.now()).getFullYear()
     }
+  },
+  methods: {
+    getJumlahCuti () {
+      return axios({
+        method: 'get',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        params: {
+          onGet: 'GetJumlahCuti',
+          idPegawai: this.dataPegawai.id
+        }
+      })
+    }
+  },
+  created () {
+    this.getJumlahCuti().then(res => {
+      this.totalCutiTahunan = res.data.totalCuti
+      store.commit('SET_TOTAL_CUTI_TAHUNAN', res.data.totalCuti)
+    })
   }
 }
 </script>

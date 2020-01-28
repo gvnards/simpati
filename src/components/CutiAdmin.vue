@@ -38,7 +38,6 @@
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
-              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti'">Hapus</button>
             </td>
           </tr>
         </tbody>
@@ -90,7 +89,7 @@ export default {
         fetch: 10 // maksimal get surat
       },
       tabs: {
-        nav: ['Usulan']
+        nav: ['Usulan Cuti']
       },
       dataSurat: [],
       usulan: {

@@ -51,6 +51,7 @@ export default {
           password: login.password
         }
       }).then(res => {
+        this.button.masuk.disable = false
         return res.data.loggedIn
       }).then(res => {
         if (res) {
@@ -119,7 +120,17 @@ export default {
                   atasan: atasan
                 }
               })
+              return axios({
+                method: 'post',
+                url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+                data: {
+                  onPost: 'InsertJumlahCuti',
+                  idPegawai: aPegawai.id
+                }
+              })
+            }).then(_ => {
               this.button.masuk.disable = false
+              // console.log(res)
             }).catch(_ => {
               this.button.masuk.disable = false
             })
@@ -129,9 +140,6 @@ export default {
         }
       })
     }
-  },
-  created () {
-    // this.allPegawai = store.state.pegawai
   }
 }
 </script>
