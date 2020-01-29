@@ -364,7 +364,7 @@ export default {
             this.popup.overDay = true
           } else {
             // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-            this.popup.overDay = true
+            this.popup.overDay = false
           }
         }
       }
@@ -487,6 +487,9 @@ export default {
       }
     },
     isFormFullFilled () {
+      if (this.popup.overDay) {
+        return false
+      }
       if (this.cutiPegawai.jenisCuti !== '' && this.cutiPegawai.alasanCuti !== '' && this.cutiPegawai.lamaCuti.tglAwal !== '' && this.cutiPegawai.lamaCuti.tglAkhir !== '' && this.cutiPegawai.lamaCuti.totalHari !== 0 && this.cutiPegawai.alamatCuti !== '' && this.cutiPegawai.teleponCuti !== '' && this.cutiPegawai.atasanLangsung !== '' && this.cutiPegawai.pejabatBerwenang !== '') {
         if (this.cutiPegawai.jenisCuti !== 1) {
           if (this.cutiPegawai.berkasPendukung !== '') {
