@@ -6,7 +6,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     lang: 'id',
-    pegawai: [],
+    pegawai: {},
+    atasan: [],
     jabatan: [],
     opd: [],
     dataSurat: [],
@@ -17,8 +18,11 @@ export default new Vuex.Store({
     CHANGE_LANG (state, lang) {
       state.lang = lang
     },
-    SET_PEGAWAI (state, json) {
-      state.pegawai = json
+    SET_PEGAWAI (state, pegawai) {
+      state.pegawai = pegawai
+    },
+    SET_ATASAN (state, array) {
+      state.atasan = array
     },
     SET_JABATAN (state, json) {
       state.jabatan = json

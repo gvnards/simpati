@@ -51,38 +51,21 @@ const routes = [
             method: 'get',
             url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
             params: {
-              onGet: 'AllPegawai'
+              onGet: 'AllPegawai',
+              nip: router.app.$session.get('onLogin')
             }
           }).then(res => {
             next()
-            let allPegawai = res.data
-            store.commit('SET_PEGAWAI', res.data)
-            let aPegawai = allPegawai.find(el => { return el.nip === router.app.$session.get('onLogin') })
-            let atasan = []
-            if (aPegawai.nama_opd.includes('Pendidikan')) {
-              atasan.push(allPegawai.find(el => { return el.nama_jabatan.includes('Kepala Dinas Pendidikan') }))
-            } else {
-              atasan.push(allPegawai.find(el => { return el.id === aPegawai.atasan }))
-            }
-            if (atasan[0].atasan !== null) {
-              do {
-                atasan.push(allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
-              } while (atasan[atasan.length - 1].atasan !== null)
-            }
-            atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
+            store.commit('SET_PEGAWAI', res.data.pegawai)
+            let atasan = res.data.atasan
             atasan.push(bupati)
-            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
-              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }))
-            }
-            if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
-              atasan.push(allPegawai.find(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }))
-            }
-            if (aPegawai !== undefined) {
+            store.commit('SET_ATASAN', atasan)
+            if (store.state.pegawai !== undefined) {
               router.push({
                 name: 'simpati',
                 params: {
                   userId: router.app.$session.get('onLogin'),
-                  data: aPegawai,
+                  data: store.state.pegawai,
                   atasan: atasan
                 }
               })

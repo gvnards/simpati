@@ -78,46 +78,21 @@ export default {
               method: 'get',
               url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
-                onGet: 'AllPegawai'
+                onGet: 'AllPegawai',
+                nip: login.username
               }
             }).then(res => {
-              store.commit('SET_PEGAWAI', res.data)
-              this.allPegawai = store.state.pegawai
-
-              let aPegawai = this.allPegawai.find(el => { return el.nip === login.username })
-              let atasan = []
-              if (aPegawai.nama_opd.includes('Pendidikan') || aPegawai.nama_opd.includes('SMPN')) {
-                atasan.push(this.allPegawai.find(el => { return el.nama_jabatan.includes('Kepala Dinas Pendidikan') }))
-              } else if (aPegawai.nama_opd.includes('UPTD Puskesmas')) {
-                let kepalaDinkes = this.allPegawai.find(el => { return el.nama_jabatan === 'Kepala Dinas Kesehatan' })
-                if (kepalaDinkes === undefined) {
-                  atasan.push(this.allPegawai.find(el => { return parseInt(el.id) === parseInt(this.allPegawai.find(el => { return el.nama_jabatan === 'Kepala UPT Laboratorium Kesehatan' }).atasan) }))
-                } else {
-                  atasan.push(kepalaDinkes)
-                }
-              } else {
-                atasan.push(this.allPegawai.find(el => { return el.id === aPegawai.atasan }))
-              }
-              if (atasan[0].atasan !== null) {
-                do {
-                  atasan.push(this.allPegawai.find(el => { return el.id === atasan[atasan.length - 1].atasan }))
-                } while (atasan[atasan.length - 1].atasan !== null)
-              }
-              atasan = atasan.filter(el => { return parseInt(el.eselon) < 40 })
+              store.commit('SET_PEGAWAI', res.data.pegawai)
+              let atasan = res.data.atasan
               atasan.push(bupati)
-              if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }).length === 0) {
-                atasan.push(this.allPegawai.find(el => { return el.nama_jabatan === 'Asisten Administrasi Umum' }))
-              }
-              if (atasan.filter(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }).length === 0) {
-                atasan.push(this.allPegawai.find(el => { return el.nama_jabatan === 'Asisten Pemerintahan dan Kesejahteraan Rakyat' }))
-              }
+              store.commit('SET_ATASAN', atasan)
               this.$session.set('onLogin', login.username)
               this.$router.push({
                 name: 'simpati',
                 params: {
                   userId: this.$session.get('onLogin'),
-                  data: aPegawai,
-                  atasan: atasan
+                  data: store.state.pegawai,
+                  atasan: store.state.atasan
                 }
               })
               return axios({
@@ -125,12 +100,11 @@ export default {
                 url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
                 data: {
                   onPost: 'InsertJumlahCuti',
-                  idPegawai: aPegawai.id
+                  idPegawai: store.state.pegawai.id
                 }
               })
             }).then(_ => {
               this.button.masuk.disable = false
-              // console.log(res)
             }).catch(_ => {
               this.button.masuk.disable = false
             })
