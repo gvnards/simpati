@@ -148,7 +148,7 @@
               <button type="button" class="btn btn-success" @click="showPopup(); isKirim = !isKirim;">Kirim</button>
             </div>
             <div v-else-if="pengesahan">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
               <button type="button" class="btn btn-success" :disabled="dataPengesahan.status === ''" data-dismiss="modal" @click="setPengesahan()">Sahkan</button>
             </div>
             <div v-else>
@@ -161,8 +161,8 @@
     </div>
     <PopupInfo :onShow="popup.onShow">
       <template v-slot:title>
-        <span v-if="popup.isSuccess">Konfirmasi Data</span>
-        <span v-else>Terjadi Kesalahan</span>
+        <span v-if="popup.isSuccess" class="text-success">Konfirmasi Data</span>
+        <span v-else class="text-danger">Terjadi Kesalahan !</span>
       </template>
       <p v-if="popup.isSuccess">Apakah data Anda sudah benar dan yakin untuk melanjutkan ?</p>
       <p v-else>
@@ -170,10 +170,11 @@
         <span v-else>Lengkapi data Anda terlebih dahulu !</span>
       </p>
       <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
+        <button v-if="popup.isSuccess" type="button" class="btn btn-outline-danger" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Batal</button>
+        <button v-else type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
         <div v-if="popup.isSuccess">
-          <button v-if="!isKirim" type="button" class="btn btn-primary" @click="edit ? updateCuti():buatCuti()" data-dismiss="modal">Simpan</button>
-          <button v-else type="button" class="btn btn-primary" @click="kirim()" data-dismiss="modal">Proses</button>
+          <button v-if="!isKirim" type="button" class="btn btn-success" @click="edit ? updateCuti():buatCuti()" data-dismiss="modal">Simpan</button>
+          <button v-else type="button" class="btn btn-success" @click="kirim()" data-dismiss="modal">Proses</button>
         </div>
       </template>
     </PopupInfo>

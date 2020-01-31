@@ -48,7 +48,6 @@
           <div class="modal-footer">
             <div v-if="edit">
               <button type="button" class="btn btn-outline-primary" @click="popup.onShow = !popup.onShow">Perbarui</button>
-              <!-- <button type="button" class="btn btn-outline-primary" @click="showPopup(); isKirim = false;">Perbarui</button> -->
             </div>
           </div>
         </div>
@@ -57,11 +56,11 @@
 
     <PopupInfo :onShow="popup.onShow">
       <template v-slot:title>
-        <span>Konfirmasi Data</span>
+        <span class="text-success">Konfirmasi Data</span>
       </template>
       <p>Apakah data Anda sudah benar dan yakin untuk melanjutkan ?</p>
       <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
+        <button type="button" class="btn btn-outline-danger" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Batal</button>
         <button type="button" class="btn btn-primary" @click="updateCuti()" data-dismiss="modal">Simpan</button>
       </template>
     </PopupInfo>
