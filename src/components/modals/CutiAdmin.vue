@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== '1') ? 'data-pribadi' : 'data-usulan'">
+      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== 1) ? 'data-pribadi' : 'data-usulan'">
         <div class="modal-content" style="overflow: hidden;">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">

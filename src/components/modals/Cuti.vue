@@ -2,7 +2,7 @@
   <div>
     <!-- Modal -->
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== '1') ? 'data-pribadi' : 'data-usulan'">
+      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && (data.kirimSurat !== 1 && data.kirimSurat !== 2)) ? 'data-pribadi' : 'data-usulan'">
         <div class="modal-content" style="overflow: hidden;">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <div class="modal-dialog modal-dialog-scrollable" v-if="(!edit || (edit && data.kirimSurat !== '1'))" :class="window.width > 960 ? 'data-cuti' : ''" role="document" :style="pengesahan ? 'max-height: 486px;' : ''">
+      <div class="modal-dialog modal-dialog-scrollable" v-if="(!edit || (edit && (data.kirimSurat !== 1 && data.kirimSurat !== 2)))" :class="window.width > 960 ? 'data-cuti' : ''" role="document" :style="pengesahan ? 'max-height: 486px;' : ''">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
@@ -121,14 +121,14 @@
                 <label for="atasanLangsung">Atasan Langsung<span class="text-danger">*</span></label>
                 <select class="form-control" id="atasanLangsung" v-model="cutiPegawai.atasanLangsung" required>
                   <option value="" hidden selected>&lt;Pilih Atasan&gt;</option>
-                  <option v-for="(atasan, index) in atasanLangsung" :key="index" :value="atasan.id">{{ atasan.nama }} - {{ atasan.nama_jabatan }}</option>
+                  <option v-for="(atasan, index) in atasanLangsung" :key="index" :value="atasan.nip">{{ atasan.nama }} - {{ atasan.nama_jabatan }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="atasanLangsung">Pejabat Berwenang<span class="text-danger">*</span></label>
                 <select class="form-control" id="atasanLangsung" v-model="cutiPegawai.pejabatBerwenang" required>
                   <option value="" hidden selected>&lt;Pilih Pejabat&gt;</option>
-                  <option v-for="(pejabat, index) in pejabatBerwenang" :key="index" :value="pejabat.id">{{ pejabat.nama }} - {{ pejabat.nama_jabatan }}</option>
+                  <option v-for="(pejabat, index) in pejabatBerwenang" :key="index" :value="pejabat.nip">{{ pejabat.nama }} - {{ pejabat.nama_jabatan }}</option>
                 </select>
               </div>
               <div class="form-group">
@@ -559,7 +559,7 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'InsertSurat',
-          pegawai: parseInt(this.dataPegawai.id),
+          pegawai: this.dataPegawai.nip,
           jenisCuti: this.cutiPegawai.jenisCuti,
           alasanCuti: this.cutiPegawai.alasanCuti,
           tglAwal: tgl.tglAwal,
@@ -567,8 +567,8 @@ export default {
           totalHari: this.cutiPegawai.lamaCuti.totalHari,
           alamatCuti: this.cutiPegawai.alamatCuti,
           teleponCuti: this.cutiPegawai.teleponCuti,
-          atasanLangsung: parseInt(this.cutiPegawai.atasanLangsung),
-          pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
+          atasanLangsung: this.cutiPegawai.atasanLangsung,
+          pejabatBerwenang: this.cutiPegawai.pejabatBerwenang
         }
       }).then((res) => {
         return this.uploadBerkas()
@@ -584,7 +584,7 @@ export default {
       formData.append('file', this.cutiPegawai.berkasPendukung)
       formData.append('onPost', 'InsertBerkas')
       formData.append('jenisCuti', this.cutiPegawai.jenisCuti)
-      formData.append('pegawai', parseInt(this.dataPegawai.id))
+      formData.append('pegawai', this.dataPegawai.nip)
       return axios({
         method: 'post',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
@@ -601,7 +601,7 @@ export default {
         data: {
           onPost: 'DecreaseJumlahCutiTahunan',
           jumlahCutiDiambil: this.data.totalHari,
-          idPegawai: parseInt(this.data.idPegawai)
+          idPegawai: this.data.idPegawai
         }
       })
     },
@@ -612,7 +612,7 @@ export default {
         data: {
           onPost: 'UpdateJumlah',
           jumlah: jumlah,
-          idPegawai: parseInt(this.data.idPegawai),
+          idPegawai: this.data.idPegawai,
           tahun: this.data.tglAwal.split('-')[0]
         }
       })
@@ -621,7 +621,7 @@ export default {
       if (this.cutiPegawai.berkasPendukung.name !== undefined) {
         let formData = new FormData()
         let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'oldFile', 'id']
-        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, parseInt(this.dataPegawai.id), this.data.berkas, this.data.id]
+        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, this.dataPegawai.nip, this.data.berkas, this.data.id]
         for (let i = 0; i < k.length; i++) {
           formData.append(k[i], v[i])
         }
@@ -648,8 +648,8 @@ export default {
           totalHari: this.cutiPegawai.lamaCuti.totalHari,
           alamatCuti: this.cutiPegawai.alamatCuti,
           teleponCuti: this.cutiPegawai.teleponCuti,
-          atasanLangsung: parseInt(this.cutiPegawai.atasanLangsung),
-          pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
+          atasanLangsung: this.cutiPegawai.atasanLangsung,
+          pejabatBerwenang: this.cutiPegawai.pejabatBerwenang
         }
       }).then((res) => {
         this.$emit('getSuratUsulan')
@@ -664,7 +664,8 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetKirimCuti',
-          id: this.data.id
+          id: this.data.id,
+          setStatus: this.data.idPejabat === ' ' ? 2 : 1
         }
       }).then(() => {
         this.popup.onShow = !this.popup.onShow
@@ -686,7 +687,7 @@ export default {
         data: {
           onPost: 'SetPengesahan',
           id: this.data.id,
-          pengesahan: this.dataPegawai.id,
+          pengesahan: this.dataPegawai.nip,
           statusPengesahan: this.dataPengesahan.status,
           alasanPengesahan: this.dataPengesahan.alasan,
           tglAwal: tgl.tglAwal,

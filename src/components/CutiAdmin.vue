@@ -30,9 +30,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in dataSurat" :key="index">
+          <tr v-for="(item, index) in $store.state.dataSurat" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
-            <td class="text-center">{{ namaPegawai(item) }}</td>
+            <td class="text-center">{{ dataPegawaiAdmin.length === 0 ? '' : namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
             <td>{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
@@ -73,12 +73,10 @@ export default {
   watch: {
     'saring.tahun' (val) {
       this.getSurat()
-      this.getCountSurat()
     }
   },
   data () {
     return {
-      allPegawai: [],
       tambahCutiModal: 0,
       saring: {
         tahun: ''
@@ -91,12 +89,12 @@ export default {
       tabs: {
         nav: ['Usulan Cuti']
       },
-      dataSurat: [],
       usulan: {
         edit: false,
         data: {},
         url: ''
-      }
+      },
+      dataPegawaiAdmin: []
     }
   },
   computed: {
@@ -109,18 +107,6 @@ export default {
     }
   },
   methods: {
-    getCountSurat () {
-      axios({
-        method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
-        params: {
-          onGet: 'CountAllSurat',
-          filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
-        }
-      }).then(res => {
-        this.pagination.max = res.data.count <= this.pagination.fetch ? 0 : Math.ceil(res.data.count / this.pagination.fetch)
-      })
-    },
     masaKerja (data) {
       let tmt = data.nip.slice(8, 14)
       tmt = new Date(`${tmt.slice(4)}/01/${tmt.slice(0, 4)}`)
@@ -133,20 +119,20 @@ export default {
       return this.listMonth[month]
     },
     namaPegawai (item) {
-      return this.allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
+      return this.dataPegawaiAdmin.find(el => { return el.nip === item.idPegawai }).nama
     },
     getSurat () {
       axios({
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
-          onGet: 'GetAllSurat',
-          current: (this.pagination.current - 1) * this.pagination.fetch,
-          fetch: this.pagination.fetch,
+          onGet: 'GetSuratAdmin',
+          opd_id: parseInt(this.dataPegawai.opd_id),
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
-        this.dataSurat = res.data.surat
+        store.commit('SET_DATASURAT', res.data.surat)
+        this.dataPegawaiAdmin = res.data.pegawai
       })
     },
     onShowUsulan (data) {
@@ -158,46 +144,56 @@ export default {
       this.usulan.edit = true
       this.usulan.data = data
 
-      let pegawais = this.allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
-      let pegawai = pegawais.find(el => { return parseInt(el.id) === data.idPegawai })
-      let atasan = data.idAtasan === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idAtasan })
-      let pejabat = data.idPejabat === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idPejabat })
-      let tanggalSurat = new Date(data.createdAt)
-      this.usulan.url = ''
       axios({
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
         method: 'get',
-        responseType: 'blob',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
-          tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
-          nip_pegawai: pegawai.nip,
-          nama_pegawai: pegawai.nama,
-          jabatan_pegawai: pegawai.nama_jabatan,
-          pangkat_pegawai: allPangkat[pegawai.GOL_NAMA],
-          golongan_pegawai: pegawai.GOL_NAMA,
-          masa_kerja_pegawai: this.masaKerja(pegawai),
-          opd_pegawai: pegawai.nama_opd,
-          jenis_cuti: data.jenis,
-          alasan_cuti: data.alasan,
-          alamat_cuti: data.alamat,
-          nomor_telepon_cuti: data.nomorTelepon,
-          tgl_awal: data.tglAwal.split(' ')[0].split('-').reverse().join('-'),
-          tgl_akhir: data.tglAkhir.split(' ')[0].split('-').reverse().join('-'),
-          total_hari: data.totalHari,
-          nip_atasan: atasan.nip,
-          nama_atasan: atasan.nama,
-          jabatan_atasan: atasan.nama_jabatan,
-          pangkat_atasan: data.idAtasan === 0 ? '' : allPangkat[atasan.GOL_NAMA],
-          pengesahan_atasan: data.statusPengesahanAtasan,
-          alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
-          nip_pejabat: pejabat.nip,
-          nama_pejabat: pejabat.nama,
-          jabatan_pejabat: pejabat.nama_jabatan,
-          pangkat_pejabat: data.idPejabat === 0 ? '' : allPangkat[pejabat.GOL_NAMA],
-          eselon_pejabat: parseInt(pejabat.eselon),
-          pengesahan_pejabat: data.statusPengesahanPejabat,
-          alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
+          onGet: 'AllPegawai',
+          nip: data.idPegawai
         }
+      }).then(res => {
+        let pegawai = res.data.pegawai
+        let atasan = res.data.atasan.find(el => { return el.nip === data.idAtasan })
+        let pejabat = res.data.atasan
+        pejabat.push(bupati)
+        pejabat = pejabat.find(el => { return el.nip === data.idPejabat })
+        let tanggalSurat = new Date(data.createdAt)
+        this.usulan.url = ''
+        return axios({
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
+          method: 'get',
+          responseType: 'blob',
+          params: {
+            tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
+            nip_pegawai: pegawai.nip,
+            nama_pegawai: pegawai.nama,
+            jabatan_pegawai: pegawai.nama_jabatan,
+            pangkat_pegawai: allPangkat[pegawai.GOL_NAMA],
+            golongan_pegawai: pegawai.GOL_NAMA,
+            masa_kerja_pegawai: this.masaKerja(pegawai),
+            opd_pegawai: pegawai.nama_opd,
+            jenis_cuti: data.jenis,
+            alasan_cuti: data.alasan,
+            alamat_cuti: data.alamat,
+            nomor_telepon_cuti: data.nomorTelepon,
+            tgl_awal: data.tglAwal.split(' ')[0].split('-').reverse().join('-'),
+            tgl_akhir: data.tglAkhir.split(' ')[0].split('-').reverse().join('-'),
+            total_hari: data.totalHari,
+            nip_atasan: atasan.nip,
+            nama_atasan: atasan.nama,
+            jabatan_atasan: atasan.nama_jabatan,
+            pangkat_atasan: data.idAtasan === ' ' ? '' : allPangkat[atasan.GOL_NAMA],
+            pengesahan_atasan: data.statusPengesahanAtasan,
+            alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
+            nip_pejabat: pejabat.nip,
+            nama_pejabat: pejabat.nama,
+            jabatan_pejabat: pejabat.nama_jabatan,
+            pangkat_pejabat: data.idPejabat === ' ' ? '' : allPangkat[pejabat.GOL_NAMA],
+            eselon_pejabat: parseInt(pejabat.eselon),
+            pengesahan_pejabat: data.statusPengesahanPejabat,
+            alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
+          }
+        })
       }).then(res => {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
@@ -205,9 +201,7 @@ export default {
     }
   },
   created () {
-    this.allPegawai = store.state.pegawai
     this.getSurat()
-    this.getCountSurat()
   }
 }
 </script>

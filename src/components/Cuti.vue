@@ -34,14 +34,14 @@
         <tbody>
           <tr v-for="(item, index) in dataSurat" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
-            <td class="text-center" v-if="tabs.active!=='Usulan Cuti'">{{ namaPegawai(item) }}</td>
+            <td class="text-center" v-if="tabs.active!=='Usulan Cuti'">{{ dataPegawaiPengesahan.length === 0 ? '' : namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
             <td style="max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
-            <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ item.kirimSurat === 1 ? 'Terkirim':'Belum Terkirim' }}</td>
+            <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ statusUsulan[item.kirimSurat] }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
-              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti' && item.kirimSurat !== 1">Hapus</button>
+              <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti' && (item.kirimSurat !== 1 && item.kirimSurat !== 2)">Hapus</button>
             </td>
           </tr>
         </tbody>
@@ -86,7 +86,6 @@ export default {
   props: ['currMenu', 'dataPegawai'],
   data () {
     return {
-      allPegawai: [],
       saring: {
         tahun: ''
       },
@@ -114,7 +113,9 @@ export default {
       sort: {
         by: 'jenisCuti',
         dir: true // true = ASC, false = DESC
-      }
+      },
+      dataPegawaiPengesahan: [],
+      statusUsulan: ['Belum Terproses', 'Terproses', 'Terkirim ke BKPSDM', 'Selesai']
     }
   },
   watch: {
@@ -188,7 +189,7 @@ export default {
       return `${Math.floor(diffDays / 365)} Tahun ${Math.floor((diffDays % 365) / 30)} Bulan ${(diffDays % 365) % 30} Hari`
     },
     namaPegawai (item) {
-      return this.allPegawai.find(el => { return parseInt(el.id) === item.idPegawai }).nama
+      return this.dataPegawaiPengesahan.find(el => { return el.nip === item.idPegawai }).nama
     },
     tambahCuti () {
       this.getJumlahCuti()
@@ -211,7 +212,7 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
-          pegawai: this.dataPegawai.id,
+          pegawai: this.dataPegawai.nip,
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
@@ -228,7 +229,7 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
-          pegawai: this.dataPegawai.id,
+          pegawai: this.dataPegawai.nip,
           pengesahan: true,
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
@@ -238,6 +239,23 @@ export default {
         this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
 
         this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
+
+        let idPegawai = []
+        store.state.dataSurat.forEach(el => {
+          if (!idPegawai.includes(el.idPegawai)) {
+            idPegawai.push(el.idPegawai)
+          }
+        })
+        return axios({
+          method: 'get',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          params: {
+            onGet: 'GetPegawaiDataPengesahan',
+            pegawai: idPegawai
+          }
+        }).then(res => {
+          this.dataPegawaiPengesahan = res.data.pegawai
+        })
       })
     },
     onShowUsulan (data) {
@@ -250,47 +268,56 @@ export default {
         this.usulan.pengesahan = true
       }
       this.usulan.data = data
-
-      let pegawais = this.allPegawai.filter(el => { return parseInt(el.id) === data.idPegawai || parseInt(el.id) === data.idAtasan || parseInt(el.id) === data.idPejabat })
-      let pegawai = pegawais.find(el => { return parseInt(el.id) === data.idPegawai })
-      let atasan = data.idAtasan === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idAtasan })
-      let pejabat = data.idPejabat === 0 ? bupati : pegawais.find(el => { return parseInt(el.id) === data.idPejabat })
-      let tanggalSurat = new Date(data.createdAt)
-      this.usulan.url = ''
       axios({
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
         method: 'get',
-        responseType: 'blob',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
-          tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
-          nip_pegawai: pegawai.nip,
-          nama_pegawai: pegawai.nama,
-          jabatan_pegawai: pegawai.nama_jabatan,
-          pangkat_pegawai: allPangkat[pegawai.GOL_NAMA],
-          golongan_pegawai: pegawai.GOL_NAMA,
-          masa_kerja_pegawai: this.masaKerja(pegawai),
-          opd_pegawai: pegawai.nama_opd,
-          jenis_cuti: data.jenis,
-          alasan_cuti: data.alasan,
-          alamat_cuti: data.alamat,
-          nomor_telepon_cuti: data.nomorTelepon,
-          tgl_awal: data.tglAwal.split(' ')[0].split('-').reverse().join('-'),
-          tgl_akhir: data.tglAkhir.split(' ')[0].split('-').reverse().join('-'),
-          total_hari: data.totalHari,
-          nip_atasan: atasan.nip,
-          nama_atasan: atasan.nama,
-          jabatan_atasan: atasan.nama_jabatan,
-          pangkat_atasan: data.idAtasan === 0 ? '' : allPangkat[atasan.GOL_NAMA],
-          pengesahan_atasan: data.statusPengesahanAtasan,
-          alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
-          nip_pejabat: pejabat.nip,
-          nama_pejabat: pejabat.nama,
-          jabatan_pejabat: pejabat.nama_jabatan,
-          pangkat_pejabat: data.idPejabat === 0 ? '' : allPangkat[pejabat.GOL_NAMA],
-          eselon_pejabat: parseInt(pejabat.eselon),
-          pengesahan_pejabat: data.statusPengesahanPejabat,
-          alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
+          onGet: 'AllPegawai',
+          nip: data.idPegawai
         }
+      }).then(res => {
+        let pegawai = res.data.pegawai
+        let atasan = res.data.atasan.find(el => { return el.nip === data.idAtasan })
+        let pejabat = res.data.atasan
+        pejabat.push(bupati)
+        pejabat = pejabat.find(el => { return el.nip === data.idPejabat })
+        let tanggalSurat = new Date(data.createdAt)
+        this.usulan.url = ''
+        return axios({
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
+          method: 'get',
+          responseType: 'blob',
+          params: {
+            tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
+            nip_pegawai: pegawai.nip,
+            nama_pegawai: pegawai.nama,
+            jabatan_pegawai: pegawai.nama_jabatan,
+            pangkat_pegawai: allPangkat[pegawai.GOL_NAMA],
+            golongan_pegawai: pegawai.GOL_NAMA,
+            masa_kerja_pegawai: this.masaKerja(pegawai),
+            opd_pegawai: pegawai.nama_opd,
+            jenis_cuti: data.jenis,
+            alasan_cuti: data.alasan,
+            alamat_cuti: data.alamat,
+            nomor_telepon_cuti: data.nomorTelepon,
+            tgl_awal: data.tglAwal.split(' ')[0].split('-').reverse().join('-'),
+            tgl_akhir: data.tglAkhir.split(' ')[0].split('-').reverse().join('-'),
+            total_hari: data.totalHari,
+            nip_atasan: atasan.nip,
+            nama_atasan: atasan.nama,
+            jabatan_atasan: atasan.nama_jabatan,
+            pangkat_atasan: data.idAtasan === ' ' ? '' : allPangkat[atasan.GOL_NAMA],
+            pengesahan_atasan: data.statusPengesahanAtasan,
+            alasan_pengesahan_atasan: data.alasanPengesahanAtasan === null ? '' : data.alasanPengesahanAtasan,
+            nip_pejabat: pejabat.nip,
+            nama_pejabat: pejabat.nama,
+            jabatan_pejabat: pejabat.nama_jabatan,
+            pangkat_pejabat: data.idPejabat === ' ' ? '' : allPangkat[pejabat.GOL_NAMA],
+            eselon_pejabat: parseInt(pejabat.eselon),
+            pengesahan_pejabat: data.statusPengesahanPejabat,
+            alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
+          }
+        })
       }).then(res => {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
@@ -317,7 +344,6 @@ export default {
     }
   },
   created () {
-    this.allPegawai = store.state.pegawai
     this.getSuratUsulan()
   }
 }

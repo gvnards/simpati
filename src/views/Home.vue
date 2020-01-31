@@ -24,7 +24,6 @@ export default {
   name: 'home',
   data () {
     return {
-      allPegawai: [],
       button: {
         masuk: {
           disable: false
