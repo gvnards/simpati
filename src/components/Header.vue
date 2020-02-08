@@ -17,7 +17,15 @@ export default {
   props: ['dataPegawai', 'currMenu'],
   computed: {
     icon () {
-      return this.currMenu.includes('Dasbor') ? 'rocket' : this.currMenu.includes('Usulan') ? 'add_database' : ''
+      if (this.currMenu.includes('Dasbor')) {
+        return 'rocket'
+      } else if (this.currMenu.includes('Usulan')) {
+        return 'add_database'
+      } else if (this.currMenu.includes('Akun')) {
+        return 'account'
+      }
+      return ''
+      // return this.currMenu.includes('Dasbor') ? 'rocket' : this.currMenu.includes('Usulan') ? 'add_database' : ''
     }
   }
 }

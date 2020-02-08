@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== 1) ? 'data-pribadi' : 'data-usulan'">
+      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== 0) ? 'data-pribadi' : 'data-usulan'">
         <div class="modal-content" style="overflow: hidden;">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
@@ -15,7 +15,8 @@
             <div>
               <div class="tab">
                 <div class="tab-nav">
-                  <div v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
+                  <div v-if="cutiPegawai.berkasPendukung===''" class="active" @click="tabs.active=tabs.nav[0]">{{ tabs.nav[0] }}</div>
+                  <div v-else v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
                 </div>
               </div>
               <embed v-if="tambahCutiModal === 0" :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
@@ -47,7 +48,8 @@
           </div>
           <div class="modal-footer">
             <div v-if="edit">
-              <button type="button" class="btn btn-outline-primary" @click="popup.onShow = !popup.onShow">Perbarui</button>
+              <button v-if="data.kirimSurat === 2" type="button" class="btn btn-primary" @click="popup.onShow = !popup.onShow; isProses = true;">Proses</button>
+              <button v-else type="button" class="btn btn-primary" @click="popup.onShow = !popup.onShow; isProses = false;">Perbarui</button>
             </div>
           </div>
         </div>
@@ -61,7 +63,8 @@
       <p>Apakah data Anda sudah benar dan yakin untuk melanjutkan ?</p>
       <template v-slot:footer>
         <button type="button" class="btn btn-outline-danger" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Batal</button>
-        <button type="button" class="btn btn-primary" @click="updateCuti()" data-dismiss="modal">Simpan</button>
+        <button v-if="isProses" type="button" class="btn btn-success" @click="onProses()" data-dismiss="modal">Lanjutkan</button>
+        <button v-else type="button" class="btn btn-success" @click="updateCuti()" data-dismiss="modal">Simpan</button>
       </template>
     </PopupInfo>
   </div>
@@ -148,7 +151,8 @@ export default {
       tabs: {
         nav: ['Surat Usulan', 'Berkas Pendukung'],
         active: 'Surat Usulan'
-      }
+      },
+      isProses: false
     }
   },
   computed: {
@@ -173,6 +177,20 @@ export default {
     }
   },
   methods: {
+    onProses () {
+      axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'SetKirimCuti',
+          id: this.data.id,
+          setStatus: 1
+        }
+      }).then(_ => {
+        this.isProses = false
+        this.updateCuti()
+      })
+    },
     updateCuti () {
       let tgl = this.tglCuti
       axios({
@@ -188,8 +206,8 @@ export default {
           totalHari: this.cutiPegawai.lamaCuti.totalHari,
           alamatCuti: this.cutiPegawai.alamatCuti,
           teleponCuti: this.cutiPegawai.teleponCuti,
-          atasanLangsung: parseInt(this.cutiPegawai.atasanLangsung),
-          pejabatBerwenang: parseInt(this.cutiPegawai.pejabatBerwenang)
+          atasanLangsung: this.cutiPegawai.atasanLangsung,
+          pejabatBerwenang: this.cutiPegawai.pejabatBerwenang
         }
       }).then((res) => {
         this.$emit('getSurat')

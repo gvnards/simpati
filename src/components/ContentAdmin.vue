@@ -4,6 +4,8 @@
     <div class="fill-content">
       <!-- Usulan -->
       <CutiAdmin :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Cuti')" />
+      <!-- Akun -->
+      <Akun :currMenu="currMenu" v-if="currMenu.includes('Akun')" />
     </div>
   </div>
 </template>
@@ -11,12 +13,14 @@
 <script>
 import Header from '@/components/Header.vue'
 import CutiAdmin from '@/components/CutiAdmin.vue'
+import Akun from '@/components/Account.vue'
 
 export default {
   props: ['currMenu', 'dataPegawai'],
   components: {
     Header,
-    CutiAdmin
+    CutiAdmin,
+    Akun
   },
   methods: {
   }

@@ -12,6 +12,7 @@ export default new Vuex.Store({
     opd: [],
     dataSurat: [],
     totalCutiTahunan: -1,
+    dataAkun: [],
     build: 'dev'
   },
   mutations: {
@@ -35,6 +36,9 @@ export default new Vuex.Store({
     },
     SET_TOTAL_CUTI_TAHUNAN (state, total) {
       state.totalCutiTahunan = total
+    },
+    SET_DATA_AKUN (state, data) {
+      state.dataAkun = data
     }
   },
   actions: {

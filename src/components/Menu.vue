@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="profile">
-      <div class="profile-wrapper text-white">
+      <div class="profile-wrapper text-white" @click="isChangePassword = !isChangePassword; changePassword = ''">
         <img v-if="admin" src="./../assets/ico/user_shield.svg" alt="icon picture">
         <img v-else :src="dataPegawai.JENIS_KELAMIN === 'M' ? require('./../assets/ico/private_account_male.svg') : require('./../assets/ico/private_account_female.svg')" alt="icon picture">
         <div class="text-wrapper">
@@ -23,6 +23,16 @@
             <span class="status-text">Online</span>
           </div>
         </div>
+      </div>
+      <div class="change-password" :style="isChangePassword ? '' : 'display: none'">
+        <button type="button" class="close" @click="isChangePassword = false;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="form-group">
+          <label for="changePassword">Ganti Password</label>
+          <input type="password" class="form-control" id="changePassword" v-model="changePassword">
+        </div>
+        <div class="btn btn-block btn-primary btn-sm" @click="onChangePassword(); isChangePassword = false;">Ganti</div>
       </div>
     </div>
     <div class="menu">
@@ -45,6 +55,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+import store from '../store'
 export default {
   name: 'Menu',
   props: {
@@ -54,6 +66,8 @@ export default {
   },
   data () {
     return {
+      isChangePassword: false,
+      changePassword: '',
       menu: {
         main: {
           icon: [
@@ -90,6 +104,35 @@ export default {
   methods: {
     changeCurrMenu (item, mode) {
       mode === 'main' ? this.$emit('changeCurrMenu', [item]) : this.$emit('changeCurrMenu', [this.currMenu[0], item])
+    },
+    onChangePassword () {
+      if (this.changePassword === '') {
+        //
+      } else {
+        axios({
+          method: 'post',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          data: {
+            onPost: 'UpdatePassword',
+            nip: this.dataPegawai.user,
+            password: this.changePassword
+          }
+        }).then(res => {
+          if (res.data.status === 'success') {
+            this.$emit('onPopupOpen')
+            this.$emit('isSuccess', true)
+          } else {
+            this.$emit('onPopupOpen')
+            this.$emit('isSuccess', false)
+          }
+        })
+      }
+    }
+  },
+  created () {
+    if (this.dataPegawai.opd_id === '5') {
+      this.menu.main.icon.splice(2, 0, 'account.svg')
+      this.menu.main.text.splice(2, 0, 'Akun')
     }
   }
 }
@@ -133,8 +176,31 @@ export default {
     }
   }
   .profile {
+    position: relative;
     min-height: 60px;
     padding: 4px 14px;
+    transition: background-color 0.2s;
+    &:hover {
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .change-password {
+      z-index: 4;
+      position: absolute;
+      top: 0;
+      left: calc(100% + 4px);
+      min-height: 60px;
+      min-width: 100%;
+      background-color: white;
+      padding: 8px 18px;
+      border-radius: 4px;
+      .form-group {
+        input {
+          max-height: 24px;
+        }
+        margin-bottom: 8px;
+      }
+    }
     .profile-wrapper {
       display: flex;
       align-items: center;

@@ -30,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in $store.state.dataSurat" :key="index">
+          <tr v-for="(item, index) in dataSurat" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
             <td class="text-center">{{ dataPegawaiAdmin.length === 0 ? '' : namaPegawai(item) }}</td>
             <td class="text-center">{{ item.jenis.split('Cuti')[1] }}</td>
@@ -73,6 +73,9 @@ export default {
   watch: {
     'saring.tahun' (val) {
       this.getSurat()
+    },
+    'pagination.current' () {
+      this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
     }
   },
   data () {
@@ -94,7 +97,8 @@ export default {
         data: {},
         url: ''
       },
-      dataPegawaiAdmin: []
+      dataPegawaiAdmin: [],
+      dataSurat: []
     }
   },
   computed: {
@@ -131,8 +135,13 @@ export default {
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {
-        store.commit('SET_DATASURAT', res.data.surat)
         this.dataPegawaiAdmin = res.data.pegawai
+
+        store.commit('SET_DATASURAT', res.data.surat)
+
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+
+        this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
       })
     },
     onShowUsulan (data) {
