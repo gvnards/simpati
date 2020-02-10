@@ -13,7 +13,7 @@
         <thead>
           <tr>
             <th scope="col" class="text-center">No</th>
-            <th scope="col" class="text-center">NIP</th>
+            <th scope="col" class="text-center" v-if="currMenu.includes('Pegawai')">NIP</th>
             <th scope="col" class="text-center">Nama</th>
             <th scope="col" class="text-center">Aksi</th>
           </tr>
@@ -21,16 +21,16 @@
         <tbody>
           <tr v-for="(item, index) in dataAkun" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
-            <td class="text-center">{{ item.nip === undefined ? item.id : item.nip }}</td>
+            <td class="text-center" v-if="currMenu.includes('Pegawai')">{{ item.nip }}</td>
             <td class="text-center">{{ item.nama }}</td>
             <td class="text-center">
-              <button class="btn btn-sm btn-info" @click="resetPassword(item.nip === undefined ? item.id : item.nip)">Reset Password</button>
+              <button class="btn btn-sm btn-info" @click="resetPassword(item)">Reset Password</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div>
+    <div class="search-wrapper" v-if="currMenu.includes('Pegawai')">
       <div class="form-group">
         <input type="text" class="form-control" id="searchAccount" placeholder="Masukkan NIP Pegawai" v-model="search.nip">
         <div class="btn btn-sm btn-block btn-primary" @click="getAkun()">Cari</div>
@@ -55,6 +55,14 @@ export default {
     currMenu: ''
   },
   watch: {
+    currMenu (val) {
+      this.dataAkun = []
+      this.tabs.nav = [`Akun ${val[1]}`]
+      this.tabs.active = `Akun ${val[1]}`
+      if (val.includes('Admin')) {
+        this.getAkun()
+      }
+    },
     'pagination.current' (val) {
       this.dataAkun = store.state.dataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
     },
@@ -65,8 +73,8 @@ export default {
   data () {
     return {
       tabs: {
-        nav: ['Akun Pegawai', 'Akun Admin'],
-        active: 'Akun Pegawai'
+        nav: [],
+        active: ''
       },
       pagination: {
         current: 1,
@@ -81,6 +89,16 @@ export default {
   },
   methods: {
     resetPassword (item) {
+      axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'ResetPassword',
+          id: this.currMenu[1].includes('Pegawai') ? item.nip : item.user
+        }
+      }).then(res => {
+        console.log(res)
+      })
     },
     getAkun () {
       axios({
@@ -88,18 +106,25 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetAllAccounts',
-          account: 'pegawai',
+          account: this.currMenu[1].toLowerCase(),
           nip: this.search.nip
         }
       }).then(res => {
-        this.dataAkun = res.data.pegawai
-        // store.commit('SET_DATA_AKUN', res.data.pegawai)
+        if (this.currMenu[1] === 'Pegawai') {
+          this.dataAkun = res.data.pegawai
+        } else {
+          store.commit('SET_DATA_AKUN', res.data)
 
-        // this.dataAkun = store.state.dataAkun
+          this.dataAkun = store.state.dataAkun
 
-        // this.pagination.max = store.state.dataAkun.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataAkun.length / this.pagination.fetch)
+          this.pagination.max = store.state.dataAkun.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataAkun.length / this.pagination.fetch)
+        }
       })
     }
+  },
+  created () {
+    this.tabs.nav = [`Akun ${this.currMenu[1]}`]
+    this.tabs.active = `Akun ${this.currMenu[1]}`
   }
 }
 </script>
@@ -137,7 +162,7 @@ export default {
     }
   }
 }
-div {
+.search-wrapper {
   .form-group {
     margin-left: 50%;
     transform: translateX(-50%);

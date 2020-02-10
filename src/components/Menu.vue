@@ -133,6 +133,7 @@ export default {
     if (this.dataPegawai.opd_id === '5') {
       this.menu.main.icon.splice(2, 0, 'account.svg')
       this.menu.main.text.splice(2, 0, 'Akun')
+      this.menu.sub.splice(2, 0, ['Pegawai', 'Admin'])
     }
   }
 }

@@ -72,9 +72,12 @@ export default {
   },
   methods: {
     changeCurrMenu (evMenu) {
-      if (evMenu.includes('Usulan')) {
+      if (evMenu.includes('Usulan') && evMenu[1] === undefined) {
         this.currMenu = evMenu
         this.currMenu.push('Cuti')
+      } else if (evMenu.includes('Akun') && evMenu[1] === undefined) {
+        this.currMenu = evMenu
+        this.currMenu.push('Pegawai')
       } else {
         this.currMenu = evMenu
       }
