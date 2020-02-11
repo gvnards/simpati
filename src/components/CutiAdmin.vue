@@ -128,7 +128,7 @@ export default {
     getSurat () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
         params: {
           onGet: 'GetSuratAdmin',
           opd_id: parseInt(this.dataPegawai.opd_id),
@@ -155,7 +155,7 @@ export default {
 
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
         params: {
           onGet: 'AllPegawai',
           nip: data.idPegawai
@@ -169,7 +169,7 @@ export default {
         let tanggalSurat = new Date(data.createdAt)
         this.usulan.url = ''
         return axios({
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : '/home/cutibkpsdmsit/public_html/pdf/',
           method: 'get',
           responseType: 'blob',
           params: {

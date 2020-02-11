@@ -91,7 +91,7 @@ export default {
     resetPassword (item) {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
         data: {
           onPost: 'ResetPassword',
           id: this.currMenu[1].includes('Pegawai') ? item.nip : item.user
@@ -103,7 +103,7 @@ export default {
     getAkun () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
         params: {
           onGet: 'GetAllAccounts',
           account: this.currMenu[1].toLowerCase(),

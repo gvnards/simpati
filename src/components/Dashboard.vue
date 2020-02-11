@@ -53,7 +53,7 @@ export default {
     getJumlahCuti () {
       return axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
         params: {
           onGet: 'GetJumlahCuti',
           idPegawai: this.dataPegawai.id
