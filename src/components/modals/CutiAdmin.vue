@@ -180,7 +180,7 @@ export default {
     onProses () {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetKirimCuti',
           id: this.data.id,
@@ -195,7 +195,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateSurat',
           id: this.data.id,
@@ -221,10 +221,10 @@ export default {
       this.urlBerkasPendukung = ''
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/upload/berkas/cuti/' : '/home/cutibkpsdmsit/public_html/upload/berkas/cuti/'
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/upload/berkas/cuti/' : 'https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/'
       }).then(res => {
         if (res.data.cb) {
-          this.urlBerkasPendukung = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}` : `/home/cutibkpsdmsit/public_html/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
+          this.urlBerkasPendukung = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}` : `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti/${this.cutiPegawai.berkasPendukung}`
         }
       })
     },

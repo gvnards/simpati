@@ -111,7 +111,7 @@ export default {
       } else {
         axios({
           method: 'post',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
           data: {
             onPost: 'UpdatePassword',
             nip: this.dataPegawai.user,

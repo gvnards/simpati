@@ -171,7 +171,7 @@ export default {
     getJumlahCuti () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetJumlahCuti',
           idPegawai: this.dataPegawai.id
@@ -209,7 +209,7 @@ export default {
     getSuratUsulan () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
@@ -226,7 +226,7 @@ export default {
     getSuratPengesahan () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
@@ -248,7 +248,7 @@ export default {
         })
         return axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'GetPegawaiDataPengesahan',
             pegawai: idPegawai
@@ -270,7 +270,7 @@ export default {
       this.usulan.data = data
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'AllPegawai',
           nip: data.idPegawai
@@ -284,7 +284,7 @@ export default {
         let tanggalSurat = new Date(data.createdAt)
         this.usulan.url = ''
         return axios({
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : '/home/cutibkpsdmsit/public_html/pdf/',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/fpdf/' : 'https://cuti.bkpsdmsitubondo.id/pdf/',
           method: 'get',
           responseType: 'blob',
           params: {
@@ -326,7 +326,7 @@ export default {
     deleteUsulan (data) {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'DeleteUsulan',
           id: data.id
