@@ -51,13 +51,19 @@
         </div>
       </div>
     </div>
+    <PopupChangePassword :success="popup.resetPasswordSuccess" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import store from '../store'
+import PopupChangePassword from '@/components/modals/PopupChangePassword.vue'
+import $ from 'jquery'
 export default {
+  components: {
+    PopupChangePassword
+  },
   name: 'Menu',
   props: {
     dataPegawai: {},
@@ -66,6 +72,9 @@ export default {
   },
   data () {
     return {
+      popup: {
+        resetPasswordSuccess: false
+      },
       isChangePassword: false,
       changePassword: '',
       menu: {
@@ -103,7 +112,15 @@ export default {
   },
   methods: {
     changeCurrMenu (item, mode) {
-      mode === 'main' ? this.$emit('changeCurrMenu', [item]) : this.$emit('changeCurrMenu', [this.currMenu[0], item])
+      if (mode === 'main') {
+        if (this.menu.sub[this.menu.main.text.indexOf(item)].length > 0) {
+          this.$emit('changeCurrMenu', [item, this.menu.sub[this.menu.main.text.indexOf(item)][0]])
+        } else {
+          this.$emit('changeCurrMenu', [item])
+        }
+      } else {
+        this.$emit('changeCurrMenu', [this.currMenu[0], item])
+      }
     },
     onChangePassword () {
       if (this.changePassword === '') {
@@ -114,26 +131,36 @@ export default {
           url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
           data: {
             onPost: 'UpdatePassword',
-            nip: this.dataPegawai.user,
+            nip: this.dataPegawai.user === undefined ? this.dataPegawai.nip : this.dataPegawai.user,
             password: this.changePassword
           }
         }).then(res => {
           if (res.data.status === 'success') {
-            this.$emit('onPopupOpen')
-            this.$emit('isSuccess', true)
+            $('#modalPopupChangePassword').trigger('click')
+            this.popup.resetPasswordSuccess = true
           } else {
-            this.$emit('onPopupOpen')
-            this.$emit('isSuccess', false)
+            $('#modalPopupChangePassword').trigger('click')
+            this.popup.resetPasswordSuccess = false
           }
+        }).catch(res => {
+          $('#modalPopupChangePassword').trigger('click')
+          this.popup.resetPasswordSuccess = false
         })
       }
     }
   },
   created () {
-    if (this.dataPegawai.opd_id === '5') {
-      this.menu.main.icon.splice(2, 0, 'account.svg')
-      this.menu.main.text.splice(2, 0, 'Akun')
-      this.menu.sub.splice(2, 0, ['Pegawai', 'Admin'])
+    if (this.dataPegawai.user !== undefined) {
+      if (this.dataPegawai.user.includes('admin')) {
+        this.menu.main.icon.splice(2, 0, 'settings.svg')
+        this.menu.main.text.splice(2, 0, 'Atur Cuti')
+        this.menu.sub.splice(2, 0, ['Jumlah Cuti Tahunan'])
+      }
+      if (this.dataPegawai.user === 'super-admin') {
+        this.menu.main.icon.splice(1, 1, 'account.svg')
+        this.menu.main.text.splice(1, 1, 'Akun')
+        this.menu.sub.splice(1, 1, ['Pegawai', 'Admin'])
+      }
     }
   }
 }

@@ -6,6 +6,8 @@
       <CutiAdmin :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Cuti')" />
       <!-- Akun -->
       <Akun :currMenu="currMenu" v-if="currMenu.includes('Akun')" />
+      <!-- Atur Jumlah Cuti Tahunan -->
+      <CountCutiTahunan :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Jumlah Cuti Tahunan')" />
     </div>
   </div>
 </template>
@@ -14,13 +16,15 @@
 import Header from '@/components/Header.vue'
 import CutiAdmin from '@/components/CutiAdmin.vue'
 import Akun from '@/components/Account.vue'
+import CountCutiTahunan from '@/components/CountCutiTahunan.vue'
 
 export default {
   props: ['currMenu', 'dataPegawai'],
   components: {
     Header,
     CutiAdmin,
-    Akun
+    Akun,
+    CountCutiTahunan
   },
   methods: {
   }

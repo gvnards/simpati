@@ -12,9 +12,13 @@
         </select>
       </div>
     </div>
-    <div class="tab">
+    <div class="tab" style="position: relative;">
       <div class="tab-nav">
         <div v-for="(nav, index) in tabs.nav" :key="index" class="active">{{ nav }}</div>
+      </div>
+      <div class="input-group" style="max-width: 240px; position: absolute; bottom: 0; right: 0;">
+        <input type="text" class="form-control text-left" placeholder="Cari" v-model="search.find">
+        <div class="input-group-text bg-white"><img src="./../assets/ico/search.svg" alt="" srcset="" style="width: 20px;"></div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -71,11 +75,27 @@ export default {
     dataPegawai: {}
   },
   watch: {
+    'search.find' (val) {
+      if (store.state.dataSurat.length > 0) {
+        if (val === '') {
+          this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+          this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
+        } else {
+          this.tempDataSurat = store.state.dataSurat.filter(el => { return (el.jenis.toLowerCase().includes(val) || el.nama.toLowerCase().includes(val)) })
+          this.dataSurat = this.tempDataSurat
+          this.pagination.max = this.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(this.dataSurat.length / this.pagination.fetch)
+        }
+      }
+    },
     'saring.tahun' (val) {
       this.getSurat()
     },
     'pagination.current' () {
-      this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      if (this.search.find === '') {
+        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      } else {
+        this.dataSurat = this.tempDataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      }
     }
   },
   data () {
@@ -98,7 +118,11 @@ export default {
         url: ''
       },
       dataPegawaiAdmin: [],
-      dataSurat: []
+      tempDataSurat: [],
+      dataSurat: [],
+      search: {
+        find: ''
+      }
     }
   },
   computed: {
@@ -137,7 +161,13 @@ export default {
       }).then(res => {
         this.dataPegawaiAdmin = res.data.pegawai
 
-        store.commit('SET_DATASURAT', res.data.surat)
+        let tempSurat = res.data.surat
+
+        tempSurat.forEach(el => {
+          el.nama = this.dataPegawaiAdmin.find(elm => { return elm.nip === el.idPegawai }).nama
+        })
+
+        store.commit('SET_DATASURAT', tempSurat)
 
         this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
 

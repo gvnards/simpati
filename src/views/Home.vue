@@ -1,24 +1,17 @@
 <template>
   <div>
+    <PopupLogin :success="popupLoginStatus" />
     <Login @login="login($event)" :button="button"/>
-    <PopupInfo :onShow="popup.onShow">
-      <template v-slot:title>
-        Terjadi Kesalahan
-      </template>
-      <p>Username / Password salah !</p>
-      <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow">Tutup</button>
-      </template>
-    </PopupInfo>
   </div>
 </template>
 
 <script>
 import Login from '@/components/Login.vue'
-import PopupInfo from '@/components/modals/PopupInfo.vue'
+import PopupLogin from '@/components/modals/PopupLogin.vue'
 import bupati from './../store/bupati.json'
 import axios from 'axios'
 import store from '../store/index.js'
+import $ from 'jquery'
 
 export default {
   name: 'home',
@@ -29,14 +22,11 @@ export default {
           disable: false
         }
       },
-      popup: {
-        onShow: false
-      },
-      pdf: ''
+      popupLoginStatus: ''
     }
   },
   components: {
-    Login, PopupInfo
+    Login, PopupLogin
   },
   methods: {
     login (login) {
@@ -50,7 +40,6 @@ export default {
           password: login.password
         }
       }).then(res => {
-        this.button.masuk.disable = false
         return res.data.loggedIn
       }).then(res => {
         if (res) {
@@ -63,6 +52,7 @@ export default {
                 nip: login.username
               }
             }).then(res => {
+              this.button.masuk.disable = false
               this.$session.set('onLogin', login.username)
               this.$router.push({
                 name: 'admin-simpati',
@@ -71,6 +61,9 @@ export default {
                   data: res.data.dataAdmin
                 }
               })
+            }).catch(res => {
+              $('#modalPopupLogin').trigger('click')
+              this.popupLoginStatus = 'gagal'
             })
           } else {
             axios({
@@ -81,36 +74,47 @@ export default {
                 nip: login.username
               }
             }).then(res => {
+              $('#modalPopupLogin').trigger('click')
+              this.popupLoginStatus = 'sukses'
               store.commit('SET_PEGAWAI', res.data.pegawai)
               let atasan = res.data.atasan
               atasan.push(bupati)
               store.commit('SET_ATASAN', atasan)
               this.$session.set('onLogin', login.username)
-              this.$router.push({
-                name: 'simpati',
-                params: {
-                  userId: this.$session.get('onLogin'),
-                  data: store.state.pegawai,
-                  atasan: store.state.atasan
-                }
-              })
               return axios({
                 method: 'post',
                 url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
                 data: {
                   onPost: 'InsertJumlahCuti',
-                  idPegawai: store.state.pegawai.id
+                  idPegawai: store.state.pegawai.nip
                 }
               })
             }).then(_ => {
-              this.button.masuk.disable = false
+              setTimeout(() => {
+                this.button.masuk.disable = false
+                $('#closeModalPopupLogin').trigger('click')
+                this.$router.push({
+                  name: 'simpati',
+                  params: {
+                    userId: this.$session.get('onLogin'),
+                    data: store.state.pegawai,
+                    atasan: store.state.atasan
+                  }
+                })
+              }, 750)
             }).catch(_ => {
               this.button.masuk.disable = false
             })
           }
         } else {
-          this.popup.onShow = !this.popup.onShow
+          this.button.masuk.disable = false
+          $('#modalPopupLogin').trigger('click')
+          this.popupLoginStatus = 'salah'
         }
+      }).catch(res => {
+        this.button.masuk.disable = false
+        $('#modalPopupLogin').trigger('click')
+        this.popupLoginStatus = 'gagal'
       })
     }
   }

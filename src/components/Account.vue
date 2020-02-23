@@ -1,11 +1,18 @@
 <template>
   <div>
+    <PopupResetPassword :success="resetPasswordStatus" />
+    <TambahAdminModal :onShow="showTambahAdminModal" @getAkun="getAkun()" />
     <div class="header-wrapper">
       <p>{{ currMenu[0] }} <span>Daftar {{ currMenu[0] }}</span></p>
+      <button class="btn btn-sm btn-primary btn-add" v-if="currMenu[1] === 'Admin'" data-toggle="modal" data-target="#modalTambahAdmin" @click="showTambahAdminModal = true"><img src="./../assets/ico/add.svg" alt="" srcset="">Tambah</button>
     </div>
-    <div class="tab">
+    <div class="tab" style="position: relative;">
       <div class="tab-nav">
         <div v-for="(nav, index) in tabs.nav" :key="index" :class="nav === tabs.active ?'active' : ''" @click="tabs.active = nav">{{ nav }}</div>
+      </div>
+      <div class="input-group" style="max-width: 240px; position: absolute; bottom: 0; right: 0;" v-if="currMenu[1] === 'Admin'">
+        <input type="text" class="form-control text-left" placeholder="Cari" v-model="search.find">
+        <div class="input-group-text bg-white"><img src="./../assets/ico/search.svg" alt="" srcset="" style="width: 20px;"></div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -13,7 +20,7 @@
         <thead>
           <tr>
             <th scope="col" class="text-center">No</th>
-            <th scope="col" class="text-center" v-if="currMenu.includes('Pegawai')">NIP</th>
+            <th scope="col" class="text-center">{{ currMenu[1] === 'Pegawai' ? 'NIP' : 'ID' }}</th>
             <th scope="col" class="text-center">Nama</th>
             <th scope="col" class="text-center">Aksi</th>
           </tr>
@@ -21,8 +28,8 @@
         <tbody>
           <tr v-for="(item, index) in dataAkun" :key="index">
             <th scope="row" class="text-center">{{ ((pagination.current - 1) * pagination.fetch) + (index + 1) }}</th>
-            <td class="text-center" v-if="currMenu.includes('Pegawai')">{{ item.nip }}</td>
-            <td class="text-center">{{ item.nama }}</td>
+            <td class="text-center">{{ currMenu[1] === 'Pegawai' ? item.nip : item.user }}</td>
+            <td class="text-center" style="max-width: 160px;">{{ item.nama }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" @click="resetPassword(item)">Reset Password</button>
             </td>
@@ -50,11 +57,36 @@
 <script>
 import axios from 'axios'
 import store from '@/store'
+import PopupResetPassword from '@/components/modals/PopupResetPassword.vue'
+import TambahAdminModal from '@/components/modals/TambahAdmin.vue'
+import $ from 'jquery'
 export default {
+  components: {
+    PopupResetPassword,
+    TambahAdminModal
+  },
   props: {
     currMenu: ''
   },
   watch: {
+    'search.find' (val) {
+      this.pagination.current = 1
+      if (val === '') {
+        this.dataAkun = store.state.dataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        this.pagination.max = store.state.dataAkun.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataAkun.length / this.pagination.fetch)
+      } else {
+        this.tempDataAkun = store.state.dataAkun.filter(el => { return (el.nama.toLowerCase().includes(val) || el.user.toLowerCase().includes(val)) })
+        this.dataAkun = this.tempDataAkun
+        this.pagination.max = this.dataAkun.length <= this.pagination.fetch ? 0 : Math.ceil(this.dataAkun.length / this.pagination.fetch)
+      }
+    },
+    showTambahAdminModal (val) {
+      if (val) {
+        setTimeout(() => {
+          this.showTambahAdminModal = false
+        }, 1)
+      }
+    },
     currMenu (val) {
       this.dataAkun = []
       this.tabs.nav = [`Akun ${val[1]}`]
@@ -64,7 +96,11 @@ export default {
       }
     },
     'pagination.current' (val) {
-      this.dataAkun = store.state.dataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      if (this.search.find === '') {
+        this.dataAkun = store.state.dataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      } else {
+        this.dataAkun = this.tempDataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+      }
     },
     'tabs.active' (val) {
       this.search.nip = ''
@@ -72,6 +108,7 @@ export default {
   },
   data () {
     return {
+      showTambahAdminModal: false,
       tabs: {
         nav: [],
         active: ''
@@ -81,10 +118,13 @@ export default {
         max: 1,
         fetch: 10 // maksimal get surat
       },
+      tempDataAkun: [],
       dataAkun: [],
       search: {
-        nip: ''
-      }
+        nip: '',
+        find: ''
+      },
+      resetPasswordStatus: ''
     }
   },
   methods: {
@@ -97,7 +137,16 @@ export default {
           id: this.currMenu[1].includes('Pegawai') ? item.nip : item.user
         }
       }).then(res => {
-        console.log(res)
+        if (res.data.status === 'success') {
+          this.resetPasswordStatus = true
+          $('#modalPopupResetPassword').trigger('click')
+        } else {
+          this.resetPasswordStatus = false
+          $('#modalPopupResetPassword').trigger('click')
+        }
+      }).catch(res => {
+        this.resetPasswordStatus = false
+        $('#modalPopupResetPassword').trigger('click')
       })
     },
     getAkun () {
@@ -115,7 +164,7 @@ export default {
         } else {
           store.commit('SET_DATA_AKUN', res.data)
 
-          this.dataAkun = store.state.dataAkun
+          this.dataAkun = store.state.dataAkun.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
 
           this.pagination.max = store.state.dataAkun.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataAkun.length / this.pagination.fetch)
         }
@@ -170,6 +219,18 @@ export default {
     .btn {
       margin-top: 4px;
     }
+  }
+}
+.btn-add {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px 10px;
+  img {
+    width: 16px;
+    height: 16px;
+    margin-bottom: 4px;
+    margin-right: 6px;
   }
 }
 </style>

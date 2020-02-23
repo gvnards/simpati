@@ -696,6 +696,11 @@ export default {
           totalHari: this.dataPengesahan.lamaCuti.totalHari
         }
       }).then((res) => {
+        console.log(this.dataPengesahan.status)
+        if (this.dataPengesahan.status !== 4) {
+          return this.insertRekapCuti()
+        }
+      }).then(res => {
         if (this.data.idCuti === 1 && (this.dataPengesahan.status === 1 || this.dataPengesahan.status === 2)) {
           return this.decreaseJumlahCutiTahunan()
         } else if (this.data.idCuti === 5 && (this.dataPengesahan.status === 1 || this.dataPengesahan.status === 2)) {
@@ -703,6 +708,16 @@ export default {
         }
       }).then(res => {
         this.$emit('getSuratPengesahan')
+      })
+    },
+    insertRekapCuti () {
+      return axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'InsertRekapCuti',
+          idSurat: this.data.id
+        }
       })
     }
   },

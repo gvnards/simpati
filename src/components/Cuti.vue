@@ -13,9 +13,13 @@
         </select>
       </div>
     </div>
-    <div class="tab">
+    <div class="tab" style="position: relative;">
       <div class="tab-nav">
         <div v-for="(nav, index) in tabs.nav" :key="index" :style="((dataPegawai.eselon === '' || dataPegawai.eselon.includes('4')) && nav === 'Pengesahan') ? 'cursor: not-allowed;':''" :class="nav===tabs.active ? 'active':''" @click="tabActive(nav)">{{ nav }}</div>
+      </div>
+      <div class="input-group" style="max-width: 240px; position: absolute; bottom: 0; right: 0;">
+        <input type="text" class="form-control text-left" placeholder="Cari" v-model="search.find">
+        <div class="input-group-text bg-white"><img src="./../assets/ico/search.svg" alt="" srcset="" style="width: 20px;"></div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -115,10 +119,29 @@ export default {
         dir: true // true = ASC, false = DESC
       },
       dataPegawaiPengesahan: [],
-      statusUsulan: ['Belum Terproses', 'Terproses', 'Terkirim ke BKPSDM', 'Selesai']
+      statusUsulan: ['Belum Terproses', 'Terproses', 'Terkirim ke BKPSDM', 'Selesai'],
+      search: {
+        find: ''
+      }
     }
   },
   watch: {
+    'search.find' (val) {
+      if (store.state.dataSurat.length > 0) {
+        if (val === '') {
+          this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+          this.pagination.max = store.state.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(store.state.dataSurat.length / this.pagination.fetch)
+        } else {
+          if (store.state.dataSurat[0].nama !== undefined) {
+            this.tempDataSurat = store.state.dataSurat.filter(el => { return (el.jenis.toLowerCase().includes(val) || el.nama.toLowerCase().includes(val)) })
+          } else {
+            this.tempDataSurat = store.state.dataSurat.filter(el => { return (el.jenis.toLowerCase().includes(val)) })
+          }
+          this.dataSurat = this.tempDataSurat
+          this.pagination.max = this.dataSurat.length <= this.pagination.fetch ? 0 : Math.ceil(this.dataSurat.length / this.pagination.fetch)
+        }
+      }
+    },
     'sort': {
       handler (val) {
         console.log(val)
@@ -147,9 +170,17 @@ export default {
     },
     'pagination.current' (val) {
       if (this.tabs.active === 'Usulan Cuti') {
-        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        if (this.search.find === '') {
+          this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        } else {
+          this.dataSurat = this.tempDataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        }
       } else {
-        this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        if (this.search.find === '') {
+          this.dataSurat = store.state.dataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        } else {
+          this.dataSurat = this.tempDataSurat.slice((this.pagination.current - 1) * this.pagination.fetch, this.pagination.current * this.pagination.fetch)
+        }
       }
     },
     'saring.tahun' () {
@@ -174,7 +205,7 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetJumlahCuti',
-          idPegawai: this.dataPegawai.id
+          idPegawai: this.dataPegawai.nip
         }
       }).then(res => {
         store.commit('SET_TOTAL_CUTI_TAHUNAN', res.data.totalCuti)
@@ -255,7 +286,24 @@ export default {
           }
         }).then(res => {
           this.dataPegawaiPengesahan = res.data.pegawai
+
+          let tempSurat = store.state.dataSurat
+
+          tempSurat.forEach(el => {
+            el.nama = this.dataPegawaiPengesahan.find(elm => { return elm.nip === el.idPegawai }).nama
+          })
+          store.commit('SET_DATASURAT', tempSurat)
         })
+      })
+    },
+    getRekapCutiPegawai (data) {
+      return axios({
+        method: 'get',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        params: {
+          onGet: 'GetRekapCutiPegawai',
+          id_pegawai: data.idPegawai
+        }
       })
     },
     onShowUsulan (data) {
@@ -268,13 +316,82 @@ export default {
         this.usulan.pengesahan = true
       }
       this.usulan.data = data
-      axios({
-        method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
-        params: {
-          onGet: 'AllPegawai',
-          nip: data.idPegawai
+
+      let cutiTahunanN = 0
+      let cutiTahunanN1 = 0
+      let cutiTahunanN2 = 0
+      let cutiBesar = 0
+      let cutiSakit = 0
+      let cutiMelahirkan = 0
+      let cutiAlasanPenting = 0
+      let cltn = 0
+
+      this.getRekapCutiPegawai(data).then(res => {
+        let rekapCutiNonTahunan = res.data.rekapCuti
+        let rekapCutiTahunan = res.data.rekapCutiTahunan
+
+        cutiTahunanN += parseInt(rekapCutiTahunan[0].jumlah)
+        cutiTahunanN1 += parseInt(rekapCutiTahunan[1].jumlah)
+        cutiTahunanN2 += parseInt(rekapCutiTahunan[2].jumlah)
+
+        cutiBesar = rekapCutiNonTahunan.filter(el => el.id_cuti === '5')
+        if (cutiBesar.length > 0) {
+          let temp = 0
+          cutiBesar.forEach(el => {
+            temp += parseInt(el.totalHari)
+          })
+          cutiBesar = temp
+        } else {
+          cutiBesar = 0
         }
+        cutiSakit = rekapCutiNonTahunan.filter(el => el.id_cuti === '2')
+        if (cutiSakit.length > 0) {
+          let temp = 0
+          cutiSakit.forEach(el => {
+            temp += parseInt(el.totalHari)
+          })
+          cutiSakit = temp
+        } else {
+          cutiSakit = 0
+        }
+        cutiMelahirkan = rekapCutiNonTahunan.filter(el => el.id_cuti === '6')
+        if (cutiMelahirkan.length > 0) {
+          let temp = 0
+          cutiMelahirkan.forEach(el => {
+            temp += parseInt(el.totalHari)
+          })
+          cutiMelahirkan = temp
+        } else {
+          cutiMelahirkan = 0
+        }
+        cutiAlasanPenting = rekapCutiNonTahunan.filter(el => el.id_cuti === '3')
+        if (cutiAlasanPenting.length > 0) {
+          let temp = 0
+          cutiAlasanPenting.forEach(el => {
+            temp += parseInt(el.totalHari)
+          })
+          cutiAlasanPenting = temp
+        } else {
+          cutiAlasanPenting = 0
+        }
+        cltn = rekapCutiNonTahunan.filter(el => el.id_cuti === '4')
+        if (cltn.length > 0) {
+          let temp = 0
+          cltn.forEach(el => {
+            temp += parseInt(el.totalHari)
+          })
+          cltn = temp
+        } else {
+          cltn = 0
+        }
+        return axios({
+          method: 'get',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          params: {
+            onGet: 'AllPegawai',
+            nip: data.idPegawai
+          }
+        })
       }).then(res => {
         let pegawai = res.data.pegawai
         let atasan = res.data.atasan.find(el => { return el.nip === data.idAtasan })
@@ -315,7 +432,15 @@ export default {
             pangkat_pejabat: data.idPejabat === ' ' ? '' : allPangkat[pejabat.GOL_NAMA],
             eselon_pejabat: parseInt(pejabat.eselon),
             pengesahan_pejabat: data.statusPengesahanPejabat,
-            alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat
+            alasan_pengesahan_pejabat: data.alasanPengesahanPejabat === null ? '' : data.alasanPengesahanPejabat,
+            CTN: cutiTahunanN,
+            CTN1: cutiTahunanN1,
+            CTN2: cutiTahunanN2,
+            CB: cutiBesar,
+            CS: cutiSakit,
+            CM: cutiMelahirkan,
+            CKAP: cutiAlasanPenting,
+            CLTN: cltn
           }
         })
       }).then(res => {

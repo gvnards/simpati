@@ -23,6 +23,8 @@ export default {
         return 'add_database'
       } else if (this.currMenu.includes('Akun')) {
         return 'account'
+      } else if (this.currMenu.includes('Atur Cuti')) {
+        return 'settings'
       }
       return ''
       // return this.currMenu.includes('Dasbor') ? 'rocket' : this.currMenu.includes('Usulan') ? 'add_database' : ''

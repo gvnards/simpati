@@ -56,7 +56,7 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetJumlahCuti',
-          idPegawai: this.dataPegawai.id
+          idPegawai: this.dataPegawai.nip
         }
       })
     }

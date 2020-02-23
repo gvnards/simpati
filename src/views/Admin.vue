@@ -1,32 +1,18 @@
 <template>
   <div id="simpati">
-    <Menu class="a" :admin="true" :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)" @onPopupOpen="popup.onShow = !popup.onShow" @isSuccess="popup.isSuccess = $event"/>
+    <Menu class="a" :admin="true" :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
     <Content class="b" :dataPegawai="dataPegawai" :currMenu="currMenu" />
-    <PopupInfo :onShow="popup.onShow">
-      <template v-slot:title>
-        <span v-if="popup.isSuccess" class="text-success">Sukses !</span>
-        <span v-else class="text-danger">Terjadi Kesalahan !</span>
-      </template>
-      <p v-if="popup.isSuccess">Password berhasil dirubah !</p>
-      <p v-else>
-        <span>Password gagal dirubah !</span>
-      </p>
-      <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="popup.onShow = !popup.onShow" data-dismiss="exampleModalScrollable">Tutup</button>
-      </template>
-    </PopupInfo>
   </div>
 </template>
 
 <script>
 import Menu from '@/components/Menu.vue'
 import Content from '@/components/ContentAdmin.vue'
-import PopupInfo from '@/components/modals/PopupInfo.vue'
 
 export default {
   name: 'simpati',
   components: {
-    Menu, Content, PopupInfo
+    Menu, Content
   },
   data () {
     return {
@@ -63,24 +49,12 @@ export default {
         // 'TMT_CPNS': '01-04-2006'
       },
       dataAtasan: [],
-      currMenu: ['Dasbor'],
-      popup: {
-        onShow: false,
-        isSuccess: false
-      }
+      currMenu: ['Dasbor']
     }
   },
   methods: {
     changeCurrMenu (evMenu) {
-      if (evMenu.includes('Usulan') && evMenu[1] === undefined) {
-        this.currMenu = evMenu
-        this.currMenu.push('Cuti')
-      } else if (evMenu.includes('Akun') && evMenu[1] === undefined) {
-        this.currMenu = evMenu
-        this.currMenu.push('Pegawai')
-      } else {
-        this.currMenu = evMenu
-      }
+      this.currMenu = evMenu
       if (this.currMenu.includes('Keluar')) {
         this.$session.clear()
         this.$session.destroy()
