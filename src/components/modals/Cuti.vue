@@ -517,7 +517,7 @@ export default {
     },
     uploadBerkasPendukung () {
       if (this.$refs.berkasPendukung.files[0].size > 204800) {
-        alert('File terlalu besar')
+        alert('Ukuran file maksimal 200KB')
         return
       }
       this.cutiPegawai.berkasPendukung = this.$refs.berkasPendukung.files[0]
@@ -557,7 +557,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'InsertSurat',
           pegawai: this.dataPegawai.nip,
@@ -588,7 +588,7 @@ export default {
       formData.append('pegawai', this.dataPegawai.nip)
       return axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -598,7 +598,7 @@ export default {
     decreaseJumlahCutiTahunan () {
       return axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'DecreaseJumlahCutiTahunan',
           jumlahCutiDiambil: this.data.totalHari,
@@ -609,7 +609,7 @@ export default {
     updateJumlahCuti (jumlah) {
       return axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateJumlah',
           jumlah: jumlah,
@@ -628,7 +628,7 @@ export default {
         }
         axios({
           method: 'post',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -638,7 +638,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateSurat',
           id: this.data.id,
@@ -662,7 +662,7 @@ export default {
     kirim () {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetKirimCuti',
           id: this.data.id,
@@ -684,7 +684,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'SetPengesahan',
           id: this.data.id,
@@ -713,7 +713,7 @@ export default {
     insertRekapCuti () {
       return axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'InsertRekapCuti',
           idSurat: this.data.id

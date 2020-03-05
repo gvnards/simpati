@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-      <div class="modal-dialog" :class="!edit || window.width > 960 && (edit && data.kirimSurat !== 0) ? 'data-pribadi' : 'data-usulan'">
+      <div class="modal-dialog" :class="(!edit || window.width > 960 && (edit && data.kirimSurat !== 0)) && !(data.idPejabat === ' ' && data.kirimSurat === 1) ? 'data-pribadi' : 'data-usulan'">
         <div class="modal-content" style="overflow: hidden;">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
@@ -19,13 +19,46 @@
                   <div v-else v-for="(nav, index) in tabs.nav" :key="index" :class="nav===tabs.active ? 'active':''" @click="tabs.active=nav">{{ nav }}</div>
                 </div>
               </div>
-              <embed v-if="tambahCutiModal === 0" :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
+              <embed v-if="tambahCutiModal === 0 && tabs.active !== 'Surat Pengantar'" :src="tabs.active==='Surat Usulan' ? url:urlBerkasPendukung" type="application/pdf" style="width: 100%; height: 360px;">
+              <div v-else>
+                <div v-if="!getNomorSurat">
+                  <div class="form-group">
+                    <label for="lamaCuti">Nomor Surat Pengantar</label>
+                    <div id="nomorSuratPengantar">
+                      <input type="text" class="form-control text-center" placeholder="800" readonly style="max-width: 60px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" v-model="nomorSurat.pengantar" style="max-width: 110px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" placeholder="431.303.2.3" readonly style="max-width: 110px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" :placeholder="new Date(Date.now()).getFullYear()" readonly style="max-width: 60px; display: inline;">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="nomorSuratIzin">Nomor Surat Izin Cuti</label>
+                    <div id="nomorSuratIzin">
+                      <input type="text" class="form-control text-center" placeholder="851" readonly style="max-width: 60px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" v-model="nomorSurat.izin" style="max-width: 110px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" placeholder="431.303.2.3" readonly style="max-width: 110px; display: inline;">
+                      <span>/</span>
+                      <input type="text" class="form-control text-center" :placeholder="new Date(Date.now()).getFullYear()" readonly style="max-width: 60px; display: inline;">
+                    </div>
+                  </div>
+                  <button class="btn btn-block btn-md btn-primary" @click="generateSuratPengantar()">Keluarkan Surat Pengantar</button>
+                </div>
+                <div v-else>
+                  <br>
+                  <embed :src="urlSuratPengantar" type="application/pdf" style="width: 100%; height: 360px;">
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-dialog modal-dialog-scrollable" :class="window.width > 960 ? 'data-cuti' : ''" role="document" :style="edit ? 'max-height: 486px;' : ''">
+      <div class="modal-dialog modal-dialog-scrollable" :class="window.width > 960 ? 'data-cuti' : ''" role="document" :style="edit ? 'max-height: 486px;' : ''" v-if="!(data.idPejabat === ' ' && data.kirimSurat === 1)">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalScrollableTitle">
@@ -75,6 +108,7 @@ import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import $ from 'jquery'
 import store from '../../store'
+import bupati from '../../store/bupati.json'
 
 export default {
   components: {
@@ -90,10 +124,22 @@ export default {
     'tabs.active' (val) {
       if (val === 'Berkas Pendukung') {
         this.getBerkasPendukung()
+      } else if (val === 'Surat Pengantar') {
+        this.getSuratPengantar()
       }
     },
-    tambahCutiModal () {
+    tambahCutiModal (val) {
+      if (this.tabs.nav.includes('Surat Pengantar')) {
+        this.tabs.nav.pop()
+      }
+      if (val === 0 && this.data.idPejabat === ' ' && this.data.kirimSurat === 1 && !this.tabs.nav.includes('Surat Pengantar')) {
+        this.tabs.nav.push('Surat Pengantar')
+      }
       this.cutiPegawai.jenisCuti = ''
+      this.nomorSurat.pengantar = ''
+      this.nomorSurat.izin = ''
+      this.urlSuratPengantar = ''
+      this.getNomorSurat = false
       if (this.edit) {
         this.cutiPegawai = {
           jenisCuti: this.data.idCuti,
@@ -115,6 +161,12 @@ export default {
   },
   data () {
     return {
+      getNomorSurat: false,
+      urlSuratPengantar: '',
+      nomorSurat: {
+        pengantar: '',
+        izin: ''
+      },
       popup: {
         onShow: false,
         isSuccess: false
@@ -177,10 +229,80 @@ export default {
     }
   },
   methods: {
+    insertSuratPengantar () {
+      return axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : '/home/cutibkpsdmsit/public_html/server/',
+        data: {
+          onPost: 'InsertSuratPengantar',
+          id_surat: this.data.id,
+          nomor_surat_pengantar: this.nomorSurat.pengantar,
+          nomor_surat_izin: this.nomorSurat.izin
+        }
+      })
+    },
+    generateSuratPengantar () {
+      this.insertSuratPengantar().then(res => {
+        return axios({
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/surat-pengantar/' : 'https://cuti.bkpsdmsitubondo.id/surat-pengantar/',
+          method: 'get',
+          responseType: 'blob',
+          params: {
+            nomorSurat: this.nomorSurat.pengantar,
+            nomorSuratIjin: this.nomorSurat.ijin,
+            idCuti: this.data.idCuti,
+            jenisCuti: this.data.jenis,
+            nipPegawai: this.data.idPegawai,
+            totalHari: this.data.totalHari,
+            tanggalAwal: this.data.tglAwal.split(' ')[0].split('-').join('/'),
+            tanggalAkhir: this.data.tglAkhir.split(' ')[0].split('-').join('/'),
+            namaBupati: bupati.nama.toUpperCase()
+          }})
+      }).then(res => {
+        let urls = window.URL.createObjectURL(res.data)
+        this.urlSuratPengantar = urls
+      })
+    },
+    getSuratPengantar () {
+      axios({
+        method: 'get',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : '/home/cutibkpsdmsit/public_html/server/',
+        params: {
+          onGet: 'GetSuratPengantar',
+          id_surat: this.data.id
+        }
+      }).then(res => {
+        if (res.data.nomorSuratPengantar !== undefined) {
+          this.nomorSurat.pengantar = res.data.nomorSuratPengantar
+          this.nomorSurat.izin = res.data.nomorSuratIzin
+          this.getNomorSurat = true
+          return axios({
+            url: store.state.build === 'dev' ? 'http://127.0.0.1/surat-pengantar/' : 'https://cuti.bkpsdmsitubondo.id/surat-pengantar/',
+            method: 'get',
+            responseType: 'blob',
+            params: {
+              nomorSurat: this.nomorSurat.pengantar,
+              nomorSuratIjin: this.nomorSurat.izin,
+              idCuti: this.data.idCuti,
+              jenisCuti: this.data.jenis,
+              nipPegawai: this.data.idPegawai,
+              totalHari: this.data.totalHari,
+              tanggalAwal: this.data.tglAwal.split(' ')[0].split('-').join('/'),
+              tanggalAkhir: this.data.tglAkhir.split(' ')[0].split('-').join('/'),
+              namaBupati: bupati.nama.toUpperCase()
+            }})
+        }
+      }).then(res => {
+        if (res !== undefined) {
+          let urls = window.URL.createObjectURL(res.data)
+          this.urlSuratPengantar = urls
+        }
+      })
+    },
     onProses () {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : '/home/cutibkpsdmsit/public_html/server/',
         data: {
           onPost: 'SetKirimCuti',
           id: this.data.id,
@@ -195,7 +317,7 @@ export default {
       let tgl = this.tglCuti
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : '/home/cutibkpsdmsit/public_html/server/',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : '/home/cutibkpsdmsit/public_html/server/',
         data: {
           onPost: 'UpdateSurat',
           id: this.data.id,

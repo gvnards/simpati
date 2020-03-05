@@ -13,6 +13,10 @@
         </select>
       </div>
     </div>
+    <div style="border-top: 1px solid #74747466; border-bottom: 1px solid #74747466; padding: 4px; margin-bottom: 3px;">
+      <img src="./../assets/ico/info.svg" alt="" srcset="" style="width: 24px; opacity: 0.75;">
+      <span class="text-muted">Tombol Unggah akan berfungsi jika usulan telah disahkan.</span>
+    </div>
     <div class="tab" style="position: relative;">
       <div class="tab-nav">
         <div v-for="(nav, index) in tabs.nav" :key="index" :style="((dataPegawai.eselon === '' || dataPegawai.eselon.includes('4')) && nav === 'Pengesahan') ? 'cursor: not-allowed;':''" :class="nav===tabs.active ? 'active':''" @click="tabActive(nav)">{{ nav }}</div>
@@ -45,6 +49,8 @@
             <td class="text-center" v-if="tabs.active==='Usulan Cuti'">{{ statusUsulan[item.kirimSurat] }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
+              <button class="btn btn-sm btn-info" :disabled="item.pengesahanAtasan === null && item.pengesahanPejabat === null" data-toggle="modal" @click="onUnggahFile(item)">Unggah</button>
+              <input type="file" accept="application/pdf" ref="unggahFile" id="unggahFile" @change="unggahFile()" hidden>
               <button class="btn btn-sm btn-danger" @click="delUsulan = item; popup.onShow = true" v-if="tabs.active === 'Usulan Cuti' && (item.kirimSurat !== 1 && item.kirimSurat !== 2)">Hapus</button>
             </td>
           </tr>
@@ -81,6 +87,7 @@ import bupati from '@/store/bupati.json'
 import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import store from '../store'
+import $ from 'jquery'
 
 export default {
   components: {
@@ -90,6 +97,7 @@ export default {
   props: ['currMenu', 'dataPegawai'],
   data () {
     return {
+      uploadSurat: '',
       saring: {
         tahun: ''
       },
@@ -122,7 +130,8 @@ export default {
       statusUsulan: ['Belum Terproses', 'Terproses', 'Terkirim ke BKPSDM', 'Selesai'],
       search: {
         find: ''
-      }
+      },
+      itemUpload: {}
     }
   },
   watch: {
@@ -199,10 +208,39 @@ export default {
     }
   },
   methods: {
+    onUnggahFile (item) {
+      this.itemUpload = item
+      $('#unggahFile').trigger('click')
+    },
+    unggahFile () {
+      if (this.$refs.unggahFile[0].files[0].size > 204800) {
+        alert('Ukuran file maksimal 200KB')
+        return
+      }
+      this.uploadSurat = this.$refs.unggahFile[0].files[0]
+
+      let formData = new FormData()
+      formData.append('file', this.uploadSurat)
+      formData.append('onPost', this.itemUpload.suratUpload === null ? 'UploadSuratTandaTangan' : 'UpdateSuratTandaTangan')
+      formData.append('jenisCuti', this.itemUpload.idCuti)
+      formData.append('pegawai', this.itemUpload.idPegawai)
+      formData.append('id_surat', this.itemUpload.id)
+      formData.append('oldFile', this.itemUpload.suratUpload)
+      axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(res => {
+        this.getSuratUsulan()
+      })
+    },
     getJumlahCuti () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetJumlahCuti',
           idPegawai: this.dataPegawai.nip
@@ -240,7 +278,7 @@ export default {
     getSuratUsulan () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
@@ -257,7 +295,7 @@ export default {
     getSuratPengesahan () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
@@ -279,7 +317,7 @@ export default {
         })
         return axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'GetPegawaiDataPengesahan',
             pegawai: idPegawai
@@ -299,7 +337,7 @@ export default {
     getRekapCutiPegawai (data) {
       return axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetRekapCutiPegawai',
           id_pegawai: data.idPegawai
@@ -386,7 +424,7 @@ export default {
         }
         return axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'AllPegawai',
             nip: data.idPegawai
@@ -446,12 +484,15 @@ export default {
       }).then(res => {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
+        if (data.suratUpload !== null) {
+          this.usulan.url = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti-ttd/${data.suratUpload}` : `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti-ttd/${data.suratUpload}`
+        }
       })
     },
     deleteUsulan (data) {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'DeleteUsulan',
           id: data.id

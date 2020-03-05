@@ -179,7 +179,7 @@ export default {
         this.dataActive = index
         axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'GetJumlahCuti',
             idPegawai: item.nip
@@ -192,7 +192,7 @@ export default {
     onChangeJumlahCuti (item) {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'UpdateJumlahAdmin',
           jumlah: parseInt(item.jumlah),
@@ -202,7 +202,7 @@ export default {
       }).then(res => {
         return axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'GetJumlahCuti',
             idPegawai: this.dataAkunPegawai[this.dataActive].nip
@@ -216,7 +216,7 @@ export default {
   created () {
     axios({
       method: 'get',
-      url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+      url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
       params: {
         onGet: 'GetPegawaiAdmin',
         opd_id: this.dataPegawai.opd_id

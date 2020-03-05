@@ -1,5 +1,12 @@
 <template>
   <div id="simpati">
+    <div class="loads" v-if="$store.state.sync">
+      <div class="loading_ text-white">
+        <img src="./../assets/ico/sync.svg" :class="$store.state.sync ? 'rotating' : ''" alt="" srcset="">
+        <p>Sedang sinkronisasi akun pegawai...</p>
+        <p>Membutuhkan waktu 10 - 15 menit, harap menunggu...</p>
+      </div>
+    </div>
     <Menu class="a" :admin="true" :dataPegawai="dataPegawai" :currMenu="currMenu"  @changeCurrMenu="changeCurrMenu($event)"/>
     <Content class="b" :dataPegawai="dataPegawai" :currMenu="currMenu" />
   </div>
@@ -90,6 +97,34 @@ export default {
       background: #DADADA;
       &:hover {
         background-color: #AAAAAA;
+      }
+    }
+  }
+  .loads {
+    min-width: 480px;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    .loading_ {
+      text-align: center;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      .rotating {
+        animation-duration: 2s;
+        animation-name: loops;
+        animation-iteration-count: infinite;
+        animation-direction: normal;
+        @keyframes loops {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(-360deg);
+          }
+        }
       }
     }
   }

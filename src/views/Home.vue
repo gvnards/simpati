@@ -33,7 +33,7 @@ export default {
       this.button.masuk.disable = true
       axios({
         methods: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'UserLogin',
           nip: login.username,
@@ -46,7 +46,7 @@ export default {
           if (login.username.includes('admin')) {
             axios({
               method: 'get',
-              url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+              url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
                 onGet: 'GetDataAdmin',
                 nip: login.username
@@ -68,7 +68,7 @@ export default {
           } else {
             axios({
               method: 'get',
-              url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+              url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
                 onGet: 'AllPegawai',
                 nip: login.username
@@ -83,7 +83,7 @@ export default {
               this.$session.set('onLogin', login.username)
               return axios({
                 method: 'post',
-                url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+                url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
                 data: {
                   onPost: 'InsertJumlahCuti',
                   idPegawai: store.state.pegawai.nip

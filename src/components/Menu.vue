@@ -128,7 +128,7 @@ export default {
       } else {
         axios({
           method: 'post',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           data: {
             onPost: 'UpdatePassword',
             nip: this.dataPegawai.user === undefined ? this.dataPegawai.nip : this.dataPegawai.user,
@@ -155,6 +155,9 @@ export default {
         this.menu.main.icon.splice(2, 0, 'settings.svg')
         this.menu.main.text.splice(2, 0, 'Atur Cuti')
         this.menu.sub.splice(2, 0, ['Jumlah Cuti Tahunan'])
+        if (parseInt(this.dataPegawai.opd_id) === 5) {
+          this.menu.sub[1].push('Proses ke Bupati')
+        }
       }
       if (this.dataPegawai.user === 'super-admin') {
         this.menu.main.icon.splice(1, 1, 'account.svg')

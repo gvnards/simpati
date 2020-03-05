@@ -41,7 +41,7 @@
             <td>{{ item.alasan }}</td>
             <td class="text-center">{{ item.tglAwal.split(' ')[0] }} <i>s/d</i> {{ item.tglAkhir.split(' ')[0] }}</td>
             <td class="text-center">
-              <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable">Lihat Usulan</button>
+              <button class="btn btn-sm btn-info" data-toggle="modal" @click="onShowUsulan(item)" data-target="#exampleModalScrollable"><span v-if="(item.idPejabat === ' ' && item.kirimSurat === 1)">Cetak Pengantar</span><span v-else>Lihat Usulan</span></button>
             </td>
           </tr>
         </tbody>
@@ -154,8 +154,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
-          onGet: 'GetSuratAdmin',
-          opd_id: parseInt(this.dataPegawai.opd_id),
+          onGet: 'GetSuratProsesBupati',
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
       }).then(res => {

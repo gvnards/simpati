@@ -4,6 +4,7 @@
     <div class="fill-content">
       <!-- Usulan -->
       <CutiAdmin :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Cuti')" />
+      <ProsesBupati :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Proses ke Bupati')" />
       <!-- Akun -->
       <Akun :currMenu="currMenu" v-if="currMenu.includes('Akun')" />
       <!-- Atur Jumlah Cuti Tahunan -->
@@ -17,6 +18,7 @@ import Header from '@/components/Header.vue'
 import CutiAdmin from '@/components/CutiAdmin.vue'
 import Akun from '@/components/Account.vue'
 import CountCutiTahunan from '@/components/CountCutiTahunan.vue'
+import ProsesBupati from '@/components/ProsesBupati.vue'
 
 export default {
   props: ['currMenu', 'dataPegawai'],
@@ -24,7 +26,8 @@ export default {
     Header,
     CutiAdmin,
     Akun,
-    CountCutiTahunan
+    CountCutiTahunan,
+    ProsesBupati
   },
   methods: {
   }

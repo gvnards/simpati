@@ -13,7 +13,8 @@ export default new Vuex.Store({
     dataSurat: [],
     totalCutiTahunan: -1,
     dataAkun: [],
-    build: 'dev'
+    build: 'dev',
+    sync: false
   },
   mutations: {
     CHANGE_LANG (state, lang) {
@@ -39,6 +40,9 @@ export default new Vuex.Store({
     },
     SET_DATA_AKUN (state, data) {
       state.dataAkun = data
+    },
+    SET_SYNC (state, data) {
+      state.sync = data
     }
   },
   actions: {

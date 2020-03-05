@@ -102,7 +102,7 @@ export default {
         ]
         axios({
           method: 'get',
-          url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
             onGet: 'GetAllOPD'
           }
@@ -130,7 +130,7 @@ export default {
     buatAdmin () {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'CreateAdmin',
           admin: this.admin

@@ -4,6 +4,7 @@
     <TambahAdminModal :onShow="showTambahAdminModal" @getAkun="getAkun()" />
     <div class="header-wrapper">
       <p>{{ currMenu[0] }} <span>Daftar {{ currMenu[0] }}</span></p>
+      <button class="btn btn-sm btn-primary btn-add" v-if="currMenu[1] === 'Pegawai'" @click="syncAccount()"><img src="./../assets/ico/sync.svg" alt="" srcset="">Sinkron Akun</button>
       <button class="btn btn-sm btn-primary btn-add" v-if="currMenu[1] === 'Admin'" data-toggle="modal" data-target="#modalTambahAdmin" @click="showTambahAdminModal = true"><img src="./../assets/ico/add.svg" alt="" srcset="">Tambah</button>
     </div>
     <div class="tab" style="position: relative;">
@@ -128,10 +129,22 @@ export default {
     }
   },
   methods: {
+    syncAccount () {
+      store.commit('SET_SYNC', true)
+      axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'SyncUser'
+        }
+      }).then(res => {
+        store.commit('SET_SYNC', false)
+      })
+    },
     resetPassword (item) {
       axios({
         method: 'post',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'ResetPassword',
           id: this.currMenu[1].includes('Pegawai') ? item.nip : item.user
@@ -152,7 +165,7 @@ export default {
     getAkun () {
       axios({
         method: 'get',
-        url: store.state.build === 'dev' ? 'http://127.0.0.1/php_class/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
           onGet: 'GetAllAccounts',
           account: this.currMenu[1].toLowerCase(),
