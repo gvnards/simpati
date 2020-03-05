@@ -52,15 +52,21 @@ export default {
                 nip: login.username
               }
             }).then(res => {
-              this.button.masuk.disable = false
-              this.$session.set('onLogin', login.username)
-              this.$router.push({
-                name: 'admin-simpati',
-                params: {
-                  userId: this.$session.get('onLogin'),
-                  data: res.data.dataAdmin
-                }
-              })
+              $('#modalPopupLogin').trigger('click')
+              this.popupLoginStatus = 'sukses'
+              setTimeout(() => {
+                this.button.masuk.disable = false
+                $('#closeModalPopupLogin').trigger('click')
+                this.button.masuk.disable = false
+                this.$session.set('onLogin', login.username)
+                this.$router.push({
+                  name: 'admin-simpati',
+                  params: {
+                    userId: this.$session.get('onLogin'),
+                    data: res.data.dataAdmin
+                  }
+                })
+              }, 750)
             }).catch(res => {
               $('#modalPopupLogin').trigger('click')
               this.popupLoginStatus = 'gagal'
