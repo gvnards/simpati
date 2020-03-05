@@ -77,6 +77,7 @@
         <button type="button" class="btn btn-danger" @click="popup.onShow = !popup.onShow; deleteUsulan(delUsulan);" data-dismiss="modal">Hapus</button>
       </template>
     </PopupInfo>
+    <PopupUnggahFile :success="unggahFileSuccess" />
   </div>
 </template>
 
@@ -88,11 +89,13 @@ import axios from 'axios'
 import PopupInfo from '@/components/modals/PopupInfo.vue'
 import store from '../store'
 import $ from 'jquery'
+import PopupUnggahFile from '@/components/modals/PopupUnggahFile.vue'
 
 export default {
   components: {
     ModalCuti,
-    PopupInfo
+    PopupInfo,
+    PopupUnggahFile
   },
   props: ['currMenu', 'dataPegawai'],
   data () {
@@ -131,7 +134,8 @@ export default {
       search: {
         find: ''
       },
-      itemUpload: {}
+      itemUpload: {},
+      unggahFileSuccess: false
     }
   },
   watch: {
@@ -234,7 +238,12 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(res => {
+        this.unggahFileSuccess = true
+        $('#modalPopupUnggahFile').trigger('click')
         this.getSuratUsulan()
+      }).catch(res => {
+        $('#modalPopupUnggahFile').trigger('click')
+        this.unggahFileSuccess = false
       })
     },
     getJumlahCuti () {
