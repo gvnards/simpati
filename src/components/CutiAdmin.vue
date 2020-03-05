@@ -322,6 +322,9 @@ export default {
       }).then(res => {
         let urls = window.URL.createObjectURL(res.data)
         this.usulan.url = urls
+        if (data.suratUpload !== null) {
+          this.usulan.url = store.state.build === 'dev' ? `http://127.0.0.1/upload/berkas/cuti-ttd/${data.suratUpload}` : `https://cuti.bkpsdmsitubondo.id/upload/berkas/cuti-ttd/${data.suratUpload}`
+        }
       })
     }
   },
