@@ -223,6 +223,7 @@ export default {
       }
       this.uploadSurat = this.$refs.unggahFile[0].files[0]
 
+      let currentPath = store.state.build === 'dev' ? 'C:/xampp/htdocs/upload/berkas/cuti-ttd/' : '/home/cutibkpsdmsit/public_html/upload/berkas/cuti-ttd/'
       let formData = new FormData()
       formData.append('file', this.uploadSurat)
       formData.append('onPost', this.itemUpload.suratUpload === null ? 'UploadSuratTandaTangan' : 'UpdateSuratTandaTangan')
@@ -230,6 +231,7 @@ export default {
       formData.append('pegawai', this.itemUpload.idPegawai)
       formData.append('id_surat', this.itemUpload.id)
       formData.append('oldFile', this.itemUpload.suratUpload)
+      formData.append('currentPath', currentPath)
       axios({
         method: 'post',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
@@ -504,7 +506,9 @@ export default {
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         data: {
           onPost: 'DeleteUsulan',
-          id: data.id
+          id: data.id,
+          berkas: data.berkas,
+          currentPath: store.state.build === 'dev' ? 'C:/xampp/htdocs/upload/berkas/cuti/' : '/home/cutibkpsdmsit/public_html/upload/berkas/cuti/'
         }
       }).then(() => {
         this.getSuratUsulan()

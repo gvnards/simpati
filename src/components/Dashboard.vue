@@ -40,7 +40,7 @@ export default {
       cuti: {
         jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
         sisa: [12, '-', 30, '-', '-', '-'],
-        color: ['#1E6E8F', '#1E8F5A', '#8F1E1E', '#8F571E', '#8F8F1E']
+        color: ['#1E6E8F', '#1E8F5A', '#8F1E1E', '#8F571E', '#8F8F1E', '#b34700']
       }
     }
   },

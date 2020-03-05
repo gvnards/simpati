@@ -581,11 +581,13 @@ export default {
       $('#exampleModalScrollable').modal('hide')
     },
     uploadBerkas () {
+      let currentPath = store.state.build === 'dev' ? 'C:/xampp/htdocs/upload/berkas/cuti/' : '/home/cutibkpsdmsit/public_html/upload/berkas/cuti/'
       let formData = new FormData()
       formData.append('file', this.cutiPegawai.berkasPendukung)
       formData.append('onPost', 'InsertBerkas')
       formData.append('jenisCuti', this.cutiPegawai.jenisCuti)
       formData.append('pegawai', this.dataPegawai.nip)
+      formData.append('currentPath', currentPath)
       return axios({
         method: 'post',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
@@ -620,9 +622,10 @@ export default {
     },
     updateCuti () {
       if (this.cutiPegawai.berkasPendukung.name !== undefined) {
+        let currentPath = store.state.build === 'dev' ? 'C:/xampp/htdocs/upload/berkas/cuti/' : '/home/cutibkpsdmsit/public_html/upload/berkas/cuti/'
         let formData = new FormData()
-        let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'oldFile', 'id']
-        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, this.dataPegawai.nip, this.data.berkas, this.data.id]
+        let k = ['file', 'onPost', 'jenisCuti', 'pegawai', 'oldFile', 'id', 'currentPath']
+        let v = [this.cutiPegawai.berkasPendukung, 'UpdateBerkas', this.cutiPegawai.jenisCuti, this.dataPegawai.nip, this.data.berkas, this.data.id, currentPath]
         for (let i = 0; i < k.length; i++) {
           formData.append(k[i], v[i])
         }
