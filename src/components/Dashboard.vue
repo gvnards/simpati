@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-lg-3 cuti-wrapper" v-for="(jenis, index) in cuti.jenis" :key="index">
-        <div class="card">
+        <div class="card" style="cursor: pointer;" @click="showInfoCuti(index)">
           <div class="row">
             <div class="col-sm-8 jenis-cuti" :style="`color: ${cuti.color[index]}`">
               {{ jenis.toUpperCase() }}
@@ -24,18 +24,25 @@
         </div>
       </div>
     </div>
+    <PopupShowInfoCuti :idx="imgIdx" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import store from '@/store'
+import PopupShowInfoCuti from '@/components/modals/PopupShowInfoCuti.vue'
+import $ from 'jquery'
 export default {
+  components: {
+    PopupShowInfoCuti
+  },
   props: {
     dataPegawai: {}
   },
   data () {
     return {
+      imgIdx: 0,
       totalCutiTahunan: 0,
       cuti: {
         jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
@@ -50,6 +57,12 @@ export default {
     }
   },
   methods: {
+    showInfoCuti (idx) {
+      this.imgIdx = idx
+      setTimeout(() => {
+        $('#btnModalInfoCuti').trigger('click')
+      }, 300)
+    },
     getJumlahCuti () {
       return axios({
         method: 'get',
@@ -75,7 +88,6 @@ export default {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
-  cursor: default;
 }
 .card {
   position: relative;
