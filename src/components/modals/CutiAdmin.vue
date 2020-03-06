@@ -256,6 +256,7 @@ export default {
             totalHari: this.data.totalHari,
             tanggalAwal: this.data.tglAwal.split(' ')[0].split('-').join('/'),
             tanggalAkhir: this.data.tglAkhir.split(' ')[0].split('-').join('/'),
+            alasan: this.data.alasan,
             namaBupati: bupati.nama.toUpperCase()
           }})
       }).then(res => {
@@ -289,6 +290,7 @@ export default {
               totalHari: this.data.totalHari,
               tanggalAwal: this.data.tglAwal.split(' ')[0].split('-').join('/'),
               tanggalAkhir: this.data.tglAkhir.split(' ')[0].split('-').join('/'),
+              alasan: this.data.alasan,
               namaBupati: bupati.nama.toUpperCase()
             }})
         }
