@@ -8,7 +8,7 @@
         <div v-for="(nav, index) in tabs.nav" :key="index" class="active">{{ nav }}</div>
       </div>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper" :style="dataPegawai.user === 'super-admin' ? 'height: auto;' : 'height: 540px;'">
       <table class="table table-hover">
         <thead>
           <tr>
@@ -44,7 +44,8 @@
                       </div>
                     </td>
                     <td class="text-center">
-                      <button class="btn btn-primary btn-sm" :disabled="Boolean(parseInt(item.locked))" @click="onChangeJumlahCuti(item)">{{ Boolean(parseInt(item.locked)) ? 'Terkunci' : 'Ubah' }}</button>
+                      <button v-if="dataPegawai.user === 'super-admin'" class="btn btn-primary btn-sm" :disabled="!Boolean(parseInt(item.locked))" @click="unlockJumlahCuti(item)">{{ Boolean(parseInt(item.locked)) ? 'Buka Kunci' : 'Terbuka' }}</button>
+                      <button v-else class="btn btn-primary btn-sm" :disabled="Boolean(parseInt(item.locked))" @click="onChangeJumlahCuti(item)">{{ Boolean(parseInt(item.locked)) ? 'Terkunci' : 'Ubah' }}</button>
                     </td>
                   </tr>
                 </tbody>
@@ -54,13 +55,28 @@
         </tbody>
       </table>
     </div>
+    <div class="search-wrapper" v-if="dataPegawai.user === 'super-admin'">
+      <div class="form-group">
+        <input type="text" class="form-control" id="searchAccount" @keyup.enter="getAkun()" placeholder="Masukkan NIP Pegawai" v-model="search.nip">
+        <div class="btn btn-sm btn-block btn-primary" @click="getAkun()">Cari</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style lang="less" scoped>
+.search-wrapper {
+  .form-group {
+    margin-left: 50%;
+    transform: translateX(-50%);
+    max-width: 240px;
+    .btn {
+      margin-top: 4px;
+    }
+  }
+}
 .table-wrapper {
   overflow: auto;
-  height: 540px;
   scrollbar-width: thin;
   scroll-behavior: smooth;
   &::-webkit-scrollbar {
@@ -130,6 +146,9 @@ export default {
   props: ['dataPegawai', 'currMenu'],
   data () {
     return {
+      search: {
+        nip: ''
+      },
       jumlahCuti: [
         {
           tahun: '',
@@ -172,6 +191,28 @@ export default {
     }
   },
   methods: {
+    unlockJumlahCuti (item) {
+      axios({
+        method: 'post',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        data: {
+          onPost: 'UnlockJumlahCuti',
+          idPegawai: this.dataAkunPegawai[this.dataActive].nip,
+          tahun: item.tahun
+        }
+      }).then(res => {
+        return axios({
+          method: 'get',
+          url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
+          params: {
+            onGet: 'GetJumlahCuti',
+            idPegawai: this.dataAkunPegawai[this.dataActive].nip
+          }
+        })
+      }).then(res => {
+        this.jumlahCuti = res.data.eachYear
+      })
+    },
     onDataActive (item, index) {
       if (this.dataActive === index) {
         this.dataActive = -1
@@ -188,6 +229,19 @@ export default {
           this.jumlahCuti = res.data.eachYear
         })
       }
+    },
+    getAkun () {
+      axios({
+        method: 'get',
+        url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
+        params: {
+          onGet: 'GetAllAccounts',
+          account: 'pegawai',
+          nip: this.search.nip
+        }
+      }).then(res => {
+        this.dataAkunPegawai = res.data.pegawai
+      })
     },
     onChangeJumlahCuti (item) {
       axios({

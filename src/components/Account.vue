@@ -40,7 +40,7 @@
     </div>
     <div class="search-wrapper" v-if="currMenu.includes('Pegawai')">
       <div class="form-group">
-        <input type="text" class="form-control" id="searchAccount" placeholder="Masukkan NIP Pegawai" v-model="search.nip">
+        <input type="text" class="form-control" id="searchAccount" @keyup.enter="getAkun()" placeholder="Masukkan NIP Pegawai" v-model="search.nip">
         <div class="btn btn-sm btn-block btn-primary" @click="getAkun()">Cari</div>
       </div>
     </div>

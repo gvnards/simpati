@@ -8,7 +8,7 @@
     <div class="modal fade" id="modalInfoCuti" tabindex="-1" role="dialog" aria-labelledby="modalInfoCutiLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <img :src="imgUrl[idx]" alt="" srcset="" style="width: 100%; height: 100%;">
+            <img :src="$store.state.build === 'dev' ? imgLocal[idx] : imgUrl[idx]" alt="" srcset="" style="width: 100%; height: 100%;">
           </div>
         </div>
     </div>
@@ -20,7 +20,8 @@ export default {
   props: ['idx'],
   data () {
     return {
-      imgUrl: ['https://cuti.bkpsdmsitubondo.id/img/0.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/1.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/2.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/3.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/4.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/5.jpeg']
+      imgUrl: ['https://cuti.bkpsdmsitubondo.id/img/0.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/1.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/2.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/3.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/4.jpeg', 'https://cuti.bkpsdmsitubondo.id/img/5.jpeg'],
+      imgLocal: ['http://127.0.0.1/img/0.jpeg', 'http://127.0.0.1/img/1.jpeg', 'http://127.0.0.1/img/2.jpeg', 'http://127.0.0.1/img/3.jpeg', 'http://127.0.0.1/img/4.jpeg', 'http://127.0.0.1/img/5.jpeg']
     }
   }
 }

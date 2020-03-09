@@ -1,10 +1,10 @@
 <template>
-  <div id="home">
+  <div id="home" :style="$store.state.build === 'dev' ? `background-image: url(${bgImg[0]})` : `background-image: url(${bgImg[1]})`">
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-6">
           <div class="content">
-            <img class="logo" src="https://cuti.bkpsdmsitubondo.id/img/logo-situbondo.png" alt="">
+            <img class="logo" :src="$store.state.build === 'dev' ? `${logoSit[0]}` : `${logoSit[1]}`" alt="">
             <div class="logo-text">
               <p class="title">{{ $lang.aplikasi.title }}</p>
               <p class="sub-title">{{ $lang.aplikasi.subTitle }}</p>
@@ -41,6 +41,8 @@ export default {
   props: ['button'],
   data () {
     return {
+      bgImg: ['https://cuti.bkpsdmsitubondo.id/img/bg-login.jpg', 'http://127.0.0.1/img/bg-login.jpg'],
+      logoSit: ['https://cuti.bkpsdmsitubondo.id/img/logo-situbondo.png', 'http://127.0.0.1/img/logo-situbondo.png'],
       login: {
         username: '',
         password: ''
@@ -60,7 +62,6 @@ export default {
 #home {
   position: relative;
   width: 100%;
-  background-image: url("https://cuti.bkpsdmsitubondo.id/img/bg-login.jpg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
