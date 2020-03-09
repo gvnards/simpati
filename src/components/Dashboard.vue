@@ -11,7 +11,8 @@
               <p class="text-center">
                 <span>maksimal</span>
                 <br>
-                <span :style="`color: ${cuti.color[index]}`">{{ jenis.toUpperCase() === 'TAHUNAN' ? totalCutiTahunan : cuti.sisa[index] }}</span>
+                <span v-if="dataPegawai.user.includes('admin')" :style="`color: ${cutiAdmin.color[index]}`">{{ cutiAdmin.sisa[index] }}</span>
+                <span v-else :style="`color: ${cuti.color[index]}`">{{ jenis.toUpperCase() === 'TAHUNAN' ? totalCutiTahunan : cuti.sisa[index] }}</span>
                 <br>
                 <span>hari</span>
               </p>
@@ -47,6 +48,11 @@ export default {
       cuti: {
         jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
         sisa: [12, '-', 30, '-', '-', '-'],
+        color: ['#1E6E8F', '#1E8F5A', '#8F1E1E', '#8F571E', '#8F8F1E', '#b34700']
+      },
+      cutiAdmin: {
+        jenis: ['Tahunan', 'Sakit', 'Karena Alasan Penting', 'Di Luar Tanggungan Negara', 'Besar', 'Melahirkan'],
+        sisa: ['-', '-', '-', '-', '-', '-'],
         color: ['#1E6E8F', '#1E8F5A', '#8F1E1E', '#8F571E', '#8F8F1E', '#b34700']
       }
     }

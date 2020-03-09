@@ -2,6 +2,7 @@
   <div id="content">
     <Header :dataPegawai="dataPegawai" :currMenu="currMenu"></Header>
     <div class="fill-content">
+      <Dashboard :dataPegawai="dataPegawai" v-if="currMenu.includes('Dasbor')"></Dashboard>
       <!-- Usulan -->
       <CutiAdmin :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Cuti')" />
       <ProsesBupati :currMenu="currMenu" :dataPegawai="dataPegawai" v-if="currMenu.includes('Proses ke Bupati')" />
@@ -19,11 +20,13 @@ import CutiAdmin from '@/components/CutiAdmin.vue'
 import Akun from '@/components/Account.vue'
 import CountCutiTahunan from '@/components/CountCutiTahunan.vue'
 import ProsesBupati from '@/components/ProsesBupati.vue'
+import Dashboard from '@/components/Dashboard.vue'
 
 export default {
   props: ['currMenu', 'dataPegawai'],
   components: {
     Header,
+    Dashboard,
     CutiAdmin,
     Akun,
     CountCutiTahunan,

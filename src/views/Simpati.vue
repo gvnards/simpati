@@ -70,6 +70,8 @@ export default {
 
 <style lang="less" scoped>
 #simpati {
+  max-height: 100vh;
+  overflow: auto;
   display: flex;
   .a {
     min-width: 240px;
