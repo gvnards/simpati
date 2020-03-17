@@ -11,7 +11,7 @@
               <p class="text-center">
                 <span>maksimal</span>
                 <br>
-                <span v-if="dataPegawai.user.includes('admin')" :style="`color: ${cutiAdmin.color[index]}`">{{ cutiAdmin.sisa[index] }}</span>
+                <span v-if="dataPegawai.user !== undefined && dataPegawai.user.includes('admin')" :style="`color: ${cutiAdmin.color[index]}`">{{ cutiAdmin.sisa[index] }}</span>
                 <span v-else :style="`color: ${cuti.color[index]}`">{{ jenis.toUpperCase() === 'TAHUNAN' ? totalCutiTahunan : cuti.sisa[index] }}</span>
                 <br>
                 <span>hari</span>
