@@ -1,10 +1,10 @@
 <template>
-  <div id="home" :style="$store.state.build === 'dev' ? `background-image: url(${bgImg[0]})` : `background-image: url(${bgImg[1]})`">
+  <div id="home" :style="$store.state.build === 'dev' ? `background-image: url(${bgImg[1]})` : `background-image: url(${bgImg[0]})`">
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-6">
           <div class="content">
-            <img class="logo" :src="$store.state.build === 'dev' ? `${logoSit[0]}` : `${logoSit[1]}`" alt="">
+            <img class="logo" :src="$store.state.build === 'dev' ? `${logoSit[1]}` : `${logoSit[0]}`" alt="">
             <div class="logo-text">
               <p class="title">{{ $lang.aplikasi.title }}</p>
               <p class="sub-title">{{ $lang.aplikasi.subTitle }}</p>
