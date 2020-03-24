@@ -1,22 +1,13 @@
 <template>
-  <div id="home" :style="$store.state.build === 'dev' ? `background-image: url(${bgImg[1]})` : `background-image: url(${bgImg[0]})`">
+  <div id="home">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-lg-6">
-          <div class="content">
-            <img class="logo" :src="$store.state.build === 'dev' ? `${logoSit[1]}` : `${logoSit[0]}`" alt="">
-            <div class="logo-text">
-              <p class="title">{{ $lang.aplikasi.title }}</p>
-              <p class="sub-title">{{ $lang.aplikasi.subTitle }}</p>
-              <p class="government">{{ $lang.aplikasi.government }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
+        <div class="col-lg-12">
           <div class="login-wrapper">
             <div class="container">
-              <p class="title">{{ $lang.login.title }}</p>
-              <p class="subTitle">{{ $lang.login.subTitle }}</p>
+              <p class="title text-center">{{ $lang.aplikasi.title }}</p>
+              <p class="sub-title text-center">{{ $lang.aplikasi.subTitle }}</p>
+              <p class="government text-center">{{ $lang.aplikasi.government }}</p>
               <div class="form-container">
                 <div class="form-group">
                   <input v-model="login.username" type="text" class="form-control" :placeholder="$lang.input.placeholder.username" @keyup.enter="$emit('login', login)">
@@ -41,8 +32,6 @@ export default {
   props: ['button'],
   data () {
     return {
-      bgImg: ['https://cuti.bkpsdmsitubondo.id/img/bg-login.jpg', 'http://127.0.0.1/img/bg-login.jpg'],
-      logoSit: ['https://cuti.bkpsdmsitubondo.id/img/logo-situbondo.png', 'http://127.0.0.1/img/logo-situbondo.png'],
       login: {
         username: '',
         password: ''
@@ -60,12 +49,8 @@ export default {
 
 <style lang="less" scoped>
 #home {
-  position: relative;
-  width: 100%;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  .col-lg-6 {
+  background-color: rgba(66, 66, 66, 0.35);
+  .col-lg-12 {
     min-height: 100vh;
     .content {
       position: relative;
@@ -105,6 +90,9 @@ export default {
     max-width: 520px;
     height: 542px;
     background-color: white;
+    -webkit-box-shadow: 0px 0px 4px 0px rgba(99, 99, 99, 0.3);
+    -moz-box-shadow: 0px 0px 4px 0px rgba(99, 99, 99, 0.3);
+    box-shadow: 0px 0px 4px 0px rgba(99, 99, 99, 0.3);
     position: relative;
     top: 100%;
     left: 50%;
@@ -125,7 +113,7 @@ export default {
         margin-top: 10px;
       }
       .form-container {
-        margin-top: 60px;
+        margin-top: 40px;
         input {
           height: 40px;
           font-size: 18px;
