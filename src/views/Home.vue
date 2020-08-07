@@ -35,6 +35,7 @@ export default {
         methods: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'UserLogin',
           nip: login.username,
           password: login.password
@@ -48,6 +49,7 @@ export default {
               method: 'get',
               url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
+                nocache: new Date().getTime(),
                 onGet: 'GetDataAdmin',
                 nip: login.username
               }
@@ -62,6 +64,7 @@ export default {
                 this.$router.push({
                   name: 'admin-simpati',
                   params: {
+                    nocache: new Date().getTime(),
                     userId: this.$session.get('onLogin'),
                     data: res.data.dataAdmin
                   }
@@ -76,6 +79,7 @@ export default {
               method: 'get',
               url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
+                nocache: new Date().getTime(),
                 onGet: 'AllPegawai',
                 nip: login.username
               }
@@ -102,6 +106,7 @@ export default {
                 this.$router.push({
                   name: 'simpati',
                   params: {
+                    nocache: new Date().getTime(),
                     userId: this.$session.get('onLogin'),
                     data: store.state.pegawai,
                     atasan: store.state.atasan

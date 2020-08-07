@@ -154,6 +154,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetSuratProsesBupati',
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
         }
@@ -178,6 +179,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetRekapCutiPegawai',
           id_pegawai: data.idPegawai
         }
@@ -263,6 +265,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'AllPegawai',
             nip: data.idPegawai
           }
@@ -280,6 +283,7 @@ export default {
           method: 'get',
           responseType: 'blob',
           params: {
+            nocache: new Date().getTime(),
             tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
             nip_pegawai: pegawai.nip,
             nama_pegawai: pegawai.nama,

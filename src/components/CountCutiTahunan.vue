@@ -205,6 +205,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'GetJumlahCuti',
             idPegawai: this.dataAkunPegawai[this.dataActive].nip
           }
@@ -222,6 +223,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'GetJumlahCuti',
             idPegawai: item.nip
           }
@@ -235,6 +237,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetAllAccounts',
           account: 'pegawai',
           nip: this.search.nip
@@ -258,6 +261,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'GetJumlahCuti',
             idPegawai: this.dataAkunPegawai[this.dataActive].nip
           }
@@ -272,6 +276,7 @@ export default {
       method: 'get',
       url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
       params: {
+        nocache: new Date().getTime(),
         onGet: 'GetPegawaiAdmin',
         opd_id: this.dataPegawai.opd_id
       }

@@ -157,18 +157,6 @@ export default {
     },
     'sort': {
       handler (val) {
-        console.log(val)
-        // sort((a, b) => {
-        //   switch (this.sort.by) {
-        //     case 'jenisCuti':
-        //       if (this.sort.dir === true) {
-        //         return ((a.jenis === b.jenis) ? 0 : ((a.jenis > b.jenis) ? 1 : -1))
-        //       } else {
-        //         return ((a.jenis === b.jenis) ? 0 : ((a.jenis < b.jenis) ? 1 : -1))
-        //       }
-        //       break
-        //   }
-        // })
       },
       deep: true
     },
@@ -253,6 +241,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetJumlahCuti',
           idPegawai: this.dataPegawai.nip
         }
@@ -291,6 +280,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
           filterTahun: this.saring.tahun === '' ? new Date(Date.now()).getFullYear() : this.saring.tahun
@@ -308,6 +298,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetSurat',
           pegawai: this.dataPegawai.nip,
           pengesahan: true,
@@ -330,6 +321,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'GetPegawaiDataPengesahan',
             pegawai: idPegawai
           }
@@ -350,6 +342,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetRekapCutiPegawai',
           id_pegawai: data.idPegawai
         }
@@ -437,6 +430,7 @@ export default {
           method: 'get',
           url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
           params: {
+            nocache: new Date().getTime(),
             onGet: 'AllPegawai',
             nip: data.idPegawai
           }
@@ -454,6 +448,7 @@ export default {
           method: 'get',
           responseType: 'blob',
           params: {
+            nocache: new Date().getTime(),
             tanggal_surat: `Situbondo, ${tanggalSurat.getDate()} ${this.dateMonthToString(tanggalSurat.getMonth())} ${tanggalSurat.getFullYear()}`,
             nip_pegawai: pegawai.nip,
             nama_pegawai: pegawai.nama,
@@ -562,12 +557,12 @@ export default {
     height: 7px;
   }
   &::-webkit-scrollbar-track {
-    background: #EEEEEE;
+    background: #eeeeee;
   }
   &::-webkit-scrollbar-thumb {
-    background: #DADADA;
+    background: #dadada;
     &:hover {
-      background-color: #AAAAAA;
+      background-color: #aaaaaa;
     }
   }
 }

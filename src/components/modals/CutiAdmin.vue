@@ -248,6 +248,7 @@ export default {
           method: 'get',
           responseType: 'blob',
           params: {
+            nocache: new Date().getTime(),
             nomorSurat: this.nomorSurat.pengantar,
             nomorSuratIjin: this.nomorSurat.ijin,
             idCuti: this.data.idCuti,
@@ -269,6 +270,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : '/home/cutibkpsdmsit/public_html/server/',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetSuratPengantar',
           id_surat: this.data.id
         }
@@ -282,6 +284,7 @@ export default {
             method: 'get',
             responseType: 'blob',
             params: {
+              nocache: new Date().getTime(),
               nomorSurat: this.nomorSurat.pengantar,
               nomorSuratIjin: this.nomorSurat.izin,
               idCuti: this.data.idCuti,

@@ -167,6 +167,7 @@ export default {
         method: 'get',
         url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
         params: {
+          nocache: new Date().getTime(),
           onGet: 'GetAllAccounts',
           account: this.currMenu[1].toLowerCase(),
           nip: this.search.nip

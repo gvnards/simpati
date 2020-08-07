@@ -24,6 +24,7 @@ const routes = [
             method: 'get',
             url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
             params: {
+              nocache: new Date().getTime(),
               onGet: 'GetDataAdmin',
               nip: router.app.$session.get('onLogin')
             }
@@ -32,6 +33,7 @@ const routes = [
               method: 'get',
               url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
               params: {
+                nocache: new Date().getTime(),
                 onGet: 'AllPegawai'
               }
             }).then(ress => {
@@ -40,6 +42,7 @@ const routes = [
               router.push({
                 name: 'admin-simpati',
                 params: {
+                  nocache: new Date().getTime(),
                   userId: router.app.$session.get('onLogin'),
                   data: res.data.dataAdmin
                 }
@@ -51,6 +54,7 @@ const routes = [
             method: 'get',
             url: store.state.build === 'dev' ? 'http://127.0.0.1/server/' : 'https://server.cuti.bkpsdmsitubondo.id',
             params: {
+              nocache: new Date().getTime(),
               onGet: 'AllPegawai',
               nip: router.app.$session.get('onLogin')
             }
@@ -64,6 +68,7 @@ const routes = [
               router.push({
                 name: 'simpati',
                 params: {
+                  nocache: new Date().getTime(),
                   userId: router.app.$session.get('onLogin'),
                   data: store.state.pegawai,
                   atasan: atasan
