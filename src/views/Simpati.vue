@@ -59,6 +59,7 @@ export default {
         this.$session.clear()
         this.$session.destroy()
         this.$router.push('/')
+        // ===
       }
     }
   },
